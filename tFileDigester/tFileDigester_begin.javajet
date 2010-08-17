@@ -1,0 +1,82 @@
+<%@ jet 
+imports="
+    org.talend.core.model.process.INode
+    org.talend.core.model.process.ElementParameterParser
+    org.talend.core.model.metadata.IMetadataTable
+    org.talend.core.model.metadata.IMetadataColumn
+    org.talend.core.model.process.IConnection
+    org.talend.core.model.process.IConnectionCategory
+    org.talend.designer.codegen.config.CodeGeneratorArgument
+    java.util.List
+    org.talend.core.model.metadata.types.JavaTypesManager
+    org.talend.core.model.metadata.types.JavaType
+" 
+%>
+
+<%
+CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
+INode node = (INode)codeGenArgument.getArgument();
+String cid = node.getUniqueName();
+
+String filename = ElementParameterParser.getValue(node, "__FILENAME__");
+String bufferSizeString = ElementParameterParser.getValue(node, "__BUFFER_SIZE__");
+String digestMethod = ElementParameterParser.getValue(node, "__DIGEST_METHOD__");
+
+String outputConnName = null;
+List< ? extends IConnection> conns = node.getOutgoingSortedConnections();
+if (conns!=null) {
+	if (conns.size()>0) {
+		for (int i=0;i<conns.size();i++) {
+			IConnection connTemp = conns.get(i);
+			if (connTemp.getLineStyle().hasConnectionCategory(IConnectionCategory.DATA)) {
+				outputConnName = connTemp.getName();
+				break;
+			}
+		}
+	}
+}
+
+if (outputConnName != null){
+%>
+
+// BufferSize
+int bufferSize_<%=cid %> = <%=bufferSizeString %>;
+if(bufferSize_<%=cid %> <= 0) { bufferSize_<%=cid %> = 1024; }
+
+
+java.io.File file_<%=cid %> = new java.io.File(<%=filename %>);
+<%=outputConnName %> = new <%=outputConnName %>Struct();
+
+if(file_<%=cid %>.exists() && file_<%=cid %>.isFile()) {
+    
+	java.security.MessageDigest digester = java.security.MessageDigest.getInstance("<%=digestMethod %>");
+	java.io.InputStream fileInputStream = new java.io.FileInputStream(file_<%=cid %>);
+	
+	try {
+		byte[] buffer = new byte[bufferSize_<%=cid %>];
+		int read;
+		do {
+			read = fileInputStream.read(buffer);
+			if (read > 0)
+				digester.update(buffer, 0, read);
+		} while (read != -1);
+	} finally {
+		fileInputStream.close();
+	}
+		
+	byte[] digest = digester.digest();
+	
+	// Representation hexedecimale de la signature 
+	StringBuffer strDigest = new StringBuffer();
+	for (int i = 0; i < digest.length; i++) {
+		strDigest.append(Integer.toString((digest[i] & 0xff) + 0x100, 16).substring(1));
+	}
+	
+	<%=outputConnName %>.filename = file_<%=cid %>.getName();
+	<%=outputConnName %>.digestHexaString = strDigest.toString();
+	<%=outputConnName %>.digestBytes = digest;
+}
+
+<%
+}
+%>

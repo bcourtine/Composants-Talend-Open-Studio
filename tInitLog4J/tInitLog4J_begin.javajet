@@ -1,0 +1,32 @@
+<%@ jet 
+	imports="
+		org.talend.core.model.process.INode
+		org.talend.core.model.process.ElementParameterParser
+		org.talend.designer.codegen.config.CodeGeneratorArgument
+	"
+%>
+<% 
+    CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
+    INode node = (INode)codeGenArgument.getArgument();
+    String cid = node.getUniqueName();
+    String fileName = ElementParameterParser.getValue(node,"__LOG4J_CONF_FILE__");
+    String lockConfig = ElementParameterParser.getValue(node,"__LOCK_CONFIG__");
+    boolean dieOnError = "true".equals(ElementParameterParser.getValue(node,"__DIE_ON_ERROR__"));
+%>
+
+<% if (dieOnError) { //Extension, existence, et droit de lecture du fichier %>
+java.io.File logConfFile_<%=cid%> = new java.io.File(<%=fileName%>);
+if(!(<%=fileName%>.endsWith(".xml")) && !(<%=fileName%>.endsWith(".properties"))) {
+	throw new java.security.InvalidParameterException("Log4J configuration file must be 'xml' or 'properties'");
+} else if((!logConfFile_<%=cid%>.exists()) || (!logConfFile_<%=cid%>.isFile())) {
+	throw new java.io.FileNotFoundException(<%=fileName%>);
+} else if (!logConfFile_<%=cid%>.canRead()) {
+	throw new java.lang.SecurityException(<%=fileName%> + " can not be read");
+}
+<% } %>
+
+try {
+	org.courtine.talend.log4j.TalendLog4JConfigurator.configureLog4J(<%=fileName%>, <%=lockConfig%>);
+} catch (Exception e) {
+	<% if (dieOnError) { %>throw e;<% } %>
+}

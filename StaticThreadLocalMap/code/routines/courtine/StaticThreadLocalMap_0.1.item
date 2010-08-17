@@ -1,0 +1,183 @@
+// template routine Java
+package routines;
+
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * La "globalMap" des jobs Talend est n'est pas statique et a une visibilité réduite (<code>private</code>). Pour
+ * certains besoins spécifique, il peut être utile d'avoir une {@link Map} statique et visible de l'extérieur du job,
+ * afin de pouvoir renvoyer facilement (à un programme appelant le job) des informations.
+ * 
+ * Cette {@link Map} est associée à chaque {@link Thread}. Ainsi, si un programme ordonnanceur lance plusieurs fois le
+ * même job en parallèle, ils peuvent utiliser ces routines de persistance d'objets sans se parasiter mutuellement.
+ * 
+ * @author Benoît Courtine, le 08/03/2010.
+ * @version 1.0
+ */
+public class StaticThreadLocalMap {
+
+	/** {@link Map} statique pour le thread courant. */
+	private static final ThreadLocal<Map<String, Object>> THREADLOCAL_MAP = new ThreadLocal<Map<String, Object>>() {
+		/**
+		 * Initialisation de la {@link Map} pour le thread courant.
+		 * 
+		 * @return Table de hachage vide.
+		 */
+		@Override
+		protected synchronized Map<String, Object> initialValue() {
+			return new HashMap<String, Object>();
+		}
+	};
+
+	/**
+	 * Constructeur privé pour interdire l'instanciation de cette classe statique.
+	 */
+	private StaticThreadLocalMap() {
+	}
+
+	/**
+	 * Méthode renvoyant la {@link Map}.
+	 * 
+	 * @return Table de mémorisation des objets.
+	 * 
+	 * {talendTypes} Object
+	 * 
+	 * {Category} StaticThreadLocalMap
+	 * 
+	 * {example} getThreadLocalMap().get("myParam") // myParamValue.
+	 */
+	public static Map<String, Object> getThreadLocalMap() {
+		return THREADLOCAL_MAP.get();
+	}
+
+	/*
+	 * Wrappers vers les méthodes les plus utilisées de la classe Map, afin de simplifier l'utilisation de cette classe.
+	 */
+
+	/**
+	 * Association entre une clé de référencement, et un objet que l'on souhaite pouvoir réutiliser ultérieurement.
+	 * 
+	 * @param key Clé de référencement de l'objet à mémoriser.
+	 * @param value Objet à mémoriser.
+	 * @return Valeur précédente associée à la clé, <code>null</code> si aucun mapping n'existait pour cette clé (ou si
+	 *         l'objet <code>null</code> était associé à cette clé).
+	 * 
+	 * {talendTypes} Object
+	 * 
+	 * {Category} StaticThreadLocalMap 
+	 * 
+	 * {param} string("myParam") key: Clé de référencement de l'objet à mémoriser.
+	 * 
+	 * {param} object(myParamValue) value: Objet associé à cette clé à mémoriser.
+	 * 
+	 * {example} put("myParam", myParamValue) // Mapping pour la clé "myParam".
+	 */
+	public static Object put(String key, Object value) {
+		return getThreadLocalMap().put(key, value);
+	}
+
+	/**
+	 * Suppression du mapping pour la clé passée en paramètre. Si seule cette clé
+	 * 
+	 * @param key Clé dont le mapping doit être supprimé.
+	 * @return Objet associé à ce mapping (avant suppression du mapping) s'il y en avait un, <code>null</code> si aucun
+	 *         mapping n'existait pour cette clé ou si la clé référençait explicitement l'objet <code>null</code>.
+	 *         
+	 * {talendTypes} Object
+	 * 
+	 * {Category} StaticThreadLocalMap 
+	 * 
+	 * {param} string("myParam") key: Clé du référencement à supprimer.
+	 * 
+	 * {example} remove("myParam") // Suppression du mapping pour la clé "myParam".
+	 */
+	public static Object remove(String key) {
+		return getThreadLocalMap().remove(key);
+	}
+
+	/**
+	 * Indique si un mapping existe pour la clé passée en paramètre. La réponse est <code>true</code> même si le mapping
+	 * référence explicitement l'objet <code>null</code>.
+	 * 
+	 * @param key Clé pour laquelle on recherche un mapping.
+	 * @return <code>true</code> si un mapping existe, <code>false</code> sinon.
+	 * 
+	 * {talendTypes} boolean | Boolean
+	 * 
+	 * {Category} StaticThreadLocalMap 
+	 * 
+	 * {param} string("myParam") key: Clé pour laquelle on veut savoir si un référencement existe.
+	 * 
+	 * {example} containsKey("myParam") // Existence d'un mapping pour la clé "myParam".
+	 */
+	public static boolean containsKey(String key) {
+		return getThreadLocalMap().containsKey(key);
+	}
+
+	/**
+	 * Renvoie l'objet associé à la clé passée en paramètre.
+	 * 
+	 * @param key Clé pour laquelle on désire récupérer l'objet mappé.
+	 * @return Objet mappé à la clé passée en paramètre, <code>null</code> si aucun mapping n'existe pour cette clé.
+	 * 
+	 * {talendTypes} Object
+	 * 
+	 * {Category} StaticThreadLocalMap 
+	 * 
+	 * {param} string("myParam") key: Clé pour laquelle on veut récupérer l'objet référencé.
+	 * 
+	 * {example} get("myParam") // Objet associé à la clé "myParam".
+	 */
+	public static Object get(String key) {
+		return getThreadLocalMap().get(key);
+	}
+
+	/**
+	 * Suppression de tous les objets mémorisés.
+	 * 
+	 * @return <code>null</code>. Ce return artificiel permet de renseigner le champ "talendTypes".
+	 * 
+	 * {talendTypes} Object
+	 * 
+	 * {Category} StaticThreadLocalMap
+	 * 
+	 * {example} clear() // Suppression de tous les mappings.
+	 */
+	public static Object clear() {
+		getThreadLocalMap().clear();
+		return null;
+	}
+
+	/*
+	 * Méthodes utilitaires.
+	 */
+
+	/**
+	 * Association entre une clé de référencement, et un objet que l'on souhaite pouvoir réutiliser ultérieurement,
+	 * uniquement si aucun mapping n'existait pour cette clé.
+	 * 
+	 * @param key Clé de référencement de l'objet à mémoriser.
+	 * @param value Objet à mémoriser.
+	 * @return <code>true</code> si le mapping est effectué, <code>false</code> si un précédent mapping existait pour
+	 *         cette clé (et a donc été conservé).
+	 *         
+	 * {talendTypes} boolean | Boolean
+	 * 
+	 * {Category} StaticThreadLocalMap 
+	 * 
+	 * {param} string("myParam") key: Clé de référencement de l'objet à mémoriser.
+	 * 
+	 * {param} object(myParamValue) value: Objet associé à cette clé à mémoriser.
+	 * 
+	 * {example} putIfNotExist("myParam", myParamValue) // Ajout d'un mapping s'il n'existait pas.
+	 */
+	public static boolean putIfNotExist(String key, Object value) {
+		if (getThreadLocalMap().containsKey(key)) {
+			return false;
+		} else {
+			getThreadLocalMap().put(key, value);
+			return true;
+		}
+	}
+}

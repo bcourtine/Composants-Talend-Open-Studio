@@ -1,0 +1,20 @@
+<%@ jet
+imports="
+		org.talend.core.model.process.INode
+		org.talend.designer.codegen.config.CodeGeneratorArgument
+		org.talend.core.model.process.ElementParameterParser
+"
+%>
+
+<%
+	CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
+	INode node = (INode)codeGenArgument.getArgument();	
+	String cid = node.getUniqueName();
+	
+	String emptyGlobalBuffer = ElementParameterParser.getValue(node,"__EMPTY_GLOBAL_BUFFER__");
+	if("true".equals(emptyGlobalBuffer)) {
+%>
+	globalBuffer.clear();
+<%
+}
+%>

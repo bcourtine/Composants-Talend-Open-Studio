@@ -1,0 +1,189 @@
+<%@ jet 
+imports="
+ 	org.talend.core.model.metadata.types.JavaType
+	org.talend.core.model.process.EConnectionType
+	org.talend.core.model.process.IConnection
+	org.talend.core.model.metadata.IMetadataColumn
+	org.talend.core.model.metadata.IMetadataTable
+	org.talend.core.model.metadata.types.JavaTypesManager
+    org.talend.core.model.process.INode 
+    org.talend.core.model.process.ElementParameterParser
+    org.talend.designer.codegen.config.CodeGeneratorArgument
+    org.talend.designer.runprocess.ProcessorUtilities
+    org.talend.designer.runprocess.ProcessorException
+    org.talend.core.model.process.IProcess
+    java.util.Map
+    java.util.List
+"
+%>
+<%
+	CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
+	INode node = (INode)codeGenArgument.getArgument();
+	String cid = node.getUniqueName();
+
+	List<IMetadataColumn> columns = null;
+	List<IMetadataTable> metadatas = node.getMetadataList();
+	if (metadatas != null && metadatas.size() > 0) {
+	    IMetadataTable metadata = metadatas.get(0);    
+	    if (metadata != null) {
+	        columns = metadata.getListColumns();
+	    }
+	}
+
+    List< ? extends IConnection> outConns = node.getOutgoingConnections(EConnectionType.FLOW_MAIN);
+
+	
+	boolean dieOnError = ElementParameterParser.getValue(node, "__DIE_ON_CHILD_ERROR__").equals("true");
+	
+	boolean isRunInMultiThread = codeGenArgument.getIsRunInMultiThread();
+	
+	boolean transmitWholeContext = ElementParameterParser.getValue(node, "__TRANSMIT_WHOLE_CONTEXT__").equals("true");
+	
+	boolean printParameter = ElementParameterParser.getValue(node, "__PRINT_PARAMETER__").equals("true");
+	IProcess currentProcess = node.getProcess();
+	
+    List<Map<String, String>> contextParams = (List<Map<String,String>>)ElementParameterParser.getObjectValue(node, "__CONTEXTPARAMS__");
+    String process = ElementParameterParser.getValue(node,"__PROCESS_TYPE_PROCESS__");
+    String context = ElementParameterParser.getValue(node,"__PROCESS_TYPE_CONTEXT__");
+    String version = ElementParameterParser.getValue(node,"__PROCESS_TYPE_VERSION__");
+    String[] codeOptions = new String[] {"\"--father_pid=\"+pid", "\"--root_pid=\"+rootPid"};
+    String[] commandLine = new String[] {"<command>"};
+    try {
+    	commandLine = ProcessorUtilities.getMainCommand(process,version, context,org.talend.designer.runprocess.IProcessor.NO_STATISTICS,org.talend.designer.runprocess.IProcessor.NO_TRACES, codeOptions);
+    } catch (ProcessorException e) {
+    }
+    
+String childJob = null;
+if(commandLine.length > 0) { 
+	childJob = commandLine[0];
+}    
+%>
+java.util.List<String> paraList_<%=cid %> = new java.util.ArrayList<String>();
+
+<%
+for (int i=1; i<commandLine.length; i++) {
+ 	if(commandLine[i].startsWith("--context=")){%>
+		paraList_<%=cid %>.add("<%=commandLine[i] %>");
+	<%}else{%>
+		paraList_<%=cid %>.add(<%=commandLine[i] %>);
+	<%}
+}
+
+if(transmitWholeContext){
+%> 
+    context.synchronizeContext();
+    java.util.Enumeration<?> propertyNames_<%=cid %> = context.propertyNames();
+    while (propertyNames_<%=cid %>.hasMoreElements()) {
+        String key_<%=cid %> = (String) propertyNames_<%=cid %>.nextElement();
+        Object value_<%=cid %> = (Object) context.get(key_<%=cid %>);       
+        paraList_<%=cid %>.add("--context_param " + key_<%=cid %> + "=" + value_<%=cid %>);
+    }
+<%
+}
+
+for (int i=0; i<contextParams.size(); i++) {
+    Map<String, String> contextParam = contextParams.get(i);
+    String name = contextParam.get("PARAM_NAME_COLUMN");
+    String value = contextParam.get("PARAM_VALUE_COLUMN");
+%>        
+    paraList_<%=cid %>.add("--context_param <%=name %>=" + RuntimeUtils.tRunJobConvertContext(<%=value %>));
+<% 
+}
+%>
+
+    <%if(printParameter){%>
+    	System.out.println("<%=cid %> in <%=currentProcess.getName() %> call <%=childJob %> with:\n\n" + paraList_<%=cid %> + "\n");
+    <%}%>
+
+    <%=childJob %> childJob_<%=cid %> = new <%=childJob %>();
+	
+	childJob_<%=cid %>.globalBuffer.addAll(globalBuffer);
+	
+	String[][] childReturn_<%=cid %> = childJob_<%=cid %>.runJob((String[]) paraList_<%=cid %>.toArray(new String[paraList_<%=cid %>.size()]));
+
+<%
+    if (childJob!=null) {
+%>  
+
+    <%
+        if(isRunInMultiThread ){
+    %>
+        ((java.util.Map)threadLocal.get()).put("errorCode", childJob_<%=cid %>.getErrorCode());
+    <%
+        }else {
+    %>
+        errorCode = childJob_<%=cid %>.getErrorCode();
+    <%
+        }
+    %>
+        
+	if(childJob_<%=cid %>.getErrorCode() == null){
+		globalMap.put("<%=cid %>_CHILD_RETURN_CODE", childJob_<%=cid %>.getStatus() != null && childJob_<%=cid %>.getStatus().equals("failure") ? 1 : 0);
+	}else{
+		globalMap.put("<%=cid %>_CHILD_RETURN_CODE", childJob_<%=cid %>.getErrorCode());
+	}
+	
+	globalMap.put("<%=cid %>_CHILD_EXCEPTION_STACKTRACE", childJob_<%=cid %>.getExceptionStackTrace());
+    
+    <% 
+    	if (dieOnError) {
+    %> 
+            if (childJob_<%=cid %>.getErrorCode() != null || childJob_<%=cid %>.getStatus().equals("failure")) {
+                throw new RuntimeException("Child job running failed");
+            }
+    <%  
+    	}
+    %>
+<%
+    }
+%>
+
+<%
+String firstConnName = null; 
+if(outConns != null && outConns.size() > 0) {
+    for (IConnection conn : outConns) {
+    	if(!conn.isActivate()) continue;
+    	firstConnName = conn.getName(); //get the first available flow link
+    	break;
+    }
+}
+
+if(firstConnName != null) {//b
+%>
+ 	for (String[] item_<%=cid %> : childReturn_<%=cid %>) { 
+<%
+	int columnSize = columns.size();
+	for (int i = 0; i < columnSize; i++) {//a
+		IMetadataColumn column = columns.get(i);
+		String label = column.getLabel();
+		String typeToGenerate = JavaTypesManager.getTypeToGenerate(column.getTalendType(), column.isNullable());
+		JavaType javaType = JavaTypesManager.getJavaTypeFromId(column.getTalendType());
+		String patternValue = column.getPattern() == null || column.getPattern().trim().length() == 0 ? null : column.getPattern();
+%>		
+	if(<%=i %> < item_<%=cid %>.length){				
+<%
+		if(javaType == JavaTypesManager.STRING || javaType == JavaTypesManager.OBJECT) {
+%>
+		<%=firstConnName %>.<%=label %> = item_<%=cid %>[<%=i %>];
+<%
+		} else if(javaType == JavaTypesManager.DATE) {
+%>
+		<%=firstConnName %>.<%=label %> = ParserUtils.parseTo_Date(item_<%=cid %>[<%=i %>], <%= patternValue %>);
+<%
+		} else if(javaType == JavaTypesManager.BYTE_ARRAY){
+%>							
+	    <%=firstConnName %>.<%=label %> = item_<%=cid %>[<%=i %>].getBytes();
+<%
+		} else {
+%>
+		<%=firstConnName %>.<%=label %> = ParserUtils.parseTo_<%= typeToGenerate %>(item_<%=cid %>[<%=i %>]);
+<%
+		}
+%>							
+    }else{
+    	<%=firstConnName %>.<%=label %> = <%=JavaTypesManager.getDefaultValueFromJavaType(typeToGenerate)%>;
+    }
+<%
+	}//a
+}//b
+%>

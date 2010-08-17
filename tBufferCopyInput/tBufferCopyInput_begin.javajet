@@ -1,0 +1,73 @@
+<%@ jet
+	    imports="
+		org.talend.core.model.process.INode 	
+		org.talend.designer.codegen.config.CodeGeneratorArgument
+		org.talend.core.model.metadata.IMetadataTable 
+		org.talend.core.model.metadata.IMetadataColumn 
+		org.talend.core.model.process.IConnection
+		org.talend.core.model.process.IConnectionCategory
+		org.talend.core.model.process.ElementParameterParser
+		
+		java.util.List
+		"
+%>
+<%
+CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
+INode node = (INode)codeGenArgument.getArgument();
+String cid = node.getUniqueName();
+String emptyGlobalBuffer = ElementParameterParser.getValue(node,"__EMPTY_GLOBAL_BUFFER__");
+%>
+
+int nb_line_<%=cid%> = 0;
+
+<%
+List<IMetadataTable> metadatas = node.getMetadataList();
+
+if ((metadatas!=null) && (metadatas.size() > 0)) {
+    IMetadataTable metadata = metadatas.get(0);
+    if (metadata != null) {
+    
+		List< ? extends IConnection> conns = node.getOutgoingSortedConnections();
+		if (conns != null){
+		
+			if (conns.size()>0){
+		
+				IConnection conn =conns.get(0);
+				String connName = conn.getName();
+		
+				if (conn.getLineStyle().hasConnectionCategory(IConnectionCategory.DATA)) {
+		
+					List<IMetadataColumn> columns = metadata.getListColumns();
+					int nbColumns = columns.size();
+//-----------
+%>
+List<String[]> globalBufferCopy = new java.util.ArrayList<String[]>(globalBuffer);
+String[] row_<%=cid%> = new String[<%=nbColumns%>];
+
+// Possible clear of globalBuffer after the copy
+<% if("true".equals(emptyGlobalBuffer)) { %>
+	globalBuffer.clear();
+<% } %>
+
+java.util.Iterator<String[]> iter_<%=cid%> = globalBufferCopy.iterator();
+while(iter_<%=cid%>.hasNext())
+{
+	row_<%=cid%> = (String[])iter_<%=cid%>.next();
+<%
+//-----------
+					for ( int i = 0; i < nbColumns; i++ ){
+					
+						IMetadataColumn column = columns.get(i);
+						String columnName = column.getLabel();
+//-----------
+%>	
+	<%=connName%>.<%=columnName%> = <%=i%> < row_<%=cid%>.length ? row_<%=cid%>[<%=i%>] : null;	
+<%
+//-----------
+					}
+				}
+			}
+		}
+	}
+}
+%>

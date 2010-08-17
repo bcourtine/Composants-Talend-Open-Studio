@@ -1,0 +1,46 @@
+<%@ jet 
+imports="
+    org.talend.core.model.process.INode 
+    org.talend.core.model.metadata.IMetadataTable 
+    org.talend.core.model.metadata.IMetadataColumn
+    org.talend.core.model.process.ElementParameterParser
+    org.talend.core.model.process.IConnection
+    org.talend.designer.codegen.config.CodeGeneratorArgument
+    java.util.List
+    java.util.Map
+    java.util.ArrayList
+    org.talend.commons.utils.StringUtils
+"
+%>
+
+<%
+CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
+INode node = (INode)codeGenArgument.getArgument();
+String cid = node.getUniqueName();
+
+// searching the incoming schema
+IMetadataTable inMetadata = null;
+IConnection inConnection = null;
+
+List<? extends IConnection> incomingConnections
+    = node.getIncomingConnections();
+if (incomingConnections != null && !incomingConnections.isEmpty()) {
+    inConnection = incomingConnections.get(0);
+    inMetadata = inConnection.getMetadataTable();
+}
+
+// searching the outgoing schema
+IMetadataTable metadata = null;
+
+List<IMetadataTable> metadatas = node.getMetadataList();
+if (metadatas != null && metadatas.size() > 0) {
+    metadata = metadatas.get(0);
+}
+
+// we only generate output if incoming and outgoing schema are defined
+if (inMetadata != null && metadata != null) {
+%>
+}
+<%
+}
+%>

@@ -1,0 +1,171 @@
+<%@ jet 
+imports="
+	org.talend.core.model.process.INode 
+	org.talend.core.model.process.ElementParameterParser
+	org.talend.core.model.metadata.IMetadataTable
+	org.talend.core.model.metadata.IMetadataColumn
+	org.talend.designer.codegen.config.CodeGeneratorArgument
+	org.talend.core.model.metadata.types.JavaTypesManager
+	org.talend.core.model.metadata.types.JavaType
+	java.util.List
+	java.util.Map
+" 
+%>
+
+<%
+CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
+INode node = (INode)codeGenArgument.getArgument();
+String cid = node.getUniqueName();
+String filename = ElementParameterParser.getValue(node, "__FILENAME__");
+String sheetname = ElementParameterParser.getValue(node, "__SHEETNAME__");
+boolean firstCellYAbsolute = ("true").equals(ElementParameterParser.getValue(node, "__FIRST_CELL_Y_ABSOLUTE__"));
+String firstCellXStr = ElementParameterParser.getValue(node, "__FIRST_CELL_X__");
+String firstCellYStr = ElementParameterParser.getValue(node, "__FIRST_CELL_Y__");
+String font = ElementParameterParser.getValue(node, "__FONT__");
+boolean isIncludeHeader = ("true").equals(ElementParameterParser.getValue(node, "__INCLUDEHEADER__"));
+boolean isAppendFile = ("true").equals(ElementParameterParser.getValue(node, "__APPEND_FILE__" ));
+boolean isAppendSheet = ("true").equals(ElementParameterParser.getValue(node, "__APPEND_SHEET__" ));
+
+List<IMetadataTable> metadatas = node.getMetadataList();
+if ((metadatas!=null)&&(metadatas.size()>0)) {
+	IMetadataTable metadata = metadatas.get(0);
+	if (metadata!=null) {
+		List<IMetadataColumn> columns = metadata.getListColumns();
+%>
+
+		int nb_line_<%=cid%> = 0;
+		java.io.File file_<%=cid %> = new java.io.File(<%=filename %>);
+		
+		<% if(("true").equals(ElementParameterParser.getValue(node,"__CREATE__"))){ %>
+		//create directory only if not exists		  
+		java.io.File parentFile_<%=cid %> = file_<%=cid %>.getParentFile();
+		if (parentFile_<%=cid %> != null && !parentFile_<%=cid %>.exists()) {
+			parentFile_<%=cid %>.mkdirs();
+		}
+		
+		org.odftoolkit.odfdom.doc.OdfSpreadsheetDocument odfDoc_<%=cid %> = null;
+		
+		<% } 
+		if (isAppendFile) {
+		%>
+		if(file_<%=cid %>.isFile() && file_<%=cid %>.exists()) {
+			odfDoc_<%=cid %> = (org.odftoolkit.odfdom.doc.OdfSpreadsheetDocument) org.odftoolkit.odfdom.doc.OdfSpreadsheetDocument.loadDocument(file_<%=cid %>);
+		} else {
+			odfDoc_<%=cid %> = org.odftoolkit.odfdom.doc.OdfSpreadsheetDocument.newSpreadsheetDocument();
+		}
+		<% } else { %>
+		odfDoc_<%=cid %> = org.odftoolkit.odfdom.doc.OdfSpreadsheetDocument.newSpreadsheetDocument();
+		<% } %>
+		org.odftoolkit.odfdom.OdfFileDom odfContentDom_<%=cid %> = odfDoc_<%=cid %>.getContentDom();
+		org.odftoolkit.odfdom.doc.office.OdfOfficeSpreadsheet odfSpreadsheet_<%=cid %> = odfDoc_<%=cid %>.getContentRoot();
+		
+		// Styles
+		odfContentDom_<%=cid %>.getOrCreateAutomaticStyles();
+		odfDoc_<%=cid %>.getOrCreateDocumentStyles();
+		
+		// Target sheet
+		org.odftoolkit.odfdom.doc.table.OdfTable odfTable_<%=cid %> = null;
+		
+		org.w3c.dom.Node childNode_<%=cid %> = odfSpreadsheet_<%=cid %>.getFirstChild();
+		<% if (!isAppendFile) { // Clean output document %>
+		while (childNode_<%=cid %> != null) {
+			odfSpreadsheet_<%=cid %>.removeChild(childNode_<%=cid %>);
+			childNode_<%=cid %> = odfSpreadsheet_<%=cid %>.getFirstChild();
+		}
+		odfTable_<%=cid %> = new org.odftoolkit.odfdom.doc.table.OdfTable(odfContentDom_<%=cid %>);
+		odfTable_<%=cid %>.setAttribute("table:name", <%=sheetname %>);
+		odfSpreadsheet_<%=cid %>.appendChild(odfTable_<%=cid %>);
+		<% } else { // Find target sheet %>
+		while (childNode_<%=cid %> != null) {
+			if(childNode_<%=cid %>.hasAttributes() &&
+					childNode_<%=cid %>.getAttributes().getNamedItem("table:name") != null &&
+					<%=sheetname %>.equals(childNode_<%=cid %>.getAttributes().getNamedItem("table:name").getNodeValue())) {
+				break;
+			}
+			childNode_<%=cid %> = childNode_<%=cid %>.getNextSibling();
+		}
+		if(childNode_<%=cid %> != null) {
+			odfTable_<%=cid %> = (org.odftoolkit.odfdom.doc.table.OdfTable) childNode_<%=cid %>;
+		} else {
+			odfTable_<%=cid %> = new org.odftoolkit.odfdom.doc.table.OdfTable(odfContentDom_<%=cid %>);
+			odfTable_<%=cid %>.setAttribute("table:name", <%=sheetname %>);
+			odfSpreadsheet_<%=cid %>.appendChild(odfTable_<%=cid %>);
+		}	
+		<%
+			// Clean sheet if "append file" but not "append sheet"
+			if (!isAppendSheet) {
+		%>
+			childNode_<%=cid %> = odfTable_<%=cid %>.getFirstChild();
+			while (childNode_<%=cid %> != null) {
+				odfTable_<%=cid %>.removeChild(childNode_<%=cid %>);
+				childNode_<%=cid %> = odfTable_<%=cid %>.getFirstChild();
+			}
+		<%
+			}
+		}
+		%>
+		
+		org.odftoolkit.odfdom.doc.table.OdfTableRow odfTableRow_<%=cid %> = null;
+		org.odftoolkit.odfdom.doc.table.OdfTableCell odfTableCell_<%=cid %> = null;
+		// org.odftoolkit.odfdom.doc.text.OdfTextParagraph odfText_<%=cid %> = null;
+		
+<%
+		// Create columns except in "append file and sheet" mode
+		if (!isAppendFile || !isAppendSheet) {
+			if (firstCellYAbsolute) {
+				// Add empty columns in X absolute position 
+				for (int i = 0; i < Integer.parseInt(firstCellXStr); i++) {
+%>
+			odfTable_<%=cid %>.addTableColumn();
+<%
+				}
+			}
+			for (int i = 0; i < columns.size(); i++) {
+%>
+			odfTable_<%=cid %>.addTableColumn();
+<%
+			}
+		}
+%>
+
+<%
+		// Y ABSOLUTE POSITION
+		if (firstCellYAbsolute) {
+			for (int i = 0; i < Integer.parseInt(firstCellYStr); i++) {
+%>
+			odfTableRow_<%=cid %> = new org.odftoolkit.odfdom.doc.table.OdfTableRow(odfContentDom_<%=cid %>);
+			odfTable_<%=cid %>.appendRow(odfTableRow_<%=cid %>);
+<%
+			}
+		}
+		// COLUMN HEADER
+		if(isIncludeHeader){
+%>
+			odfTableRow_<%=cid %> = new org.odftoolkit.odfdom.doc.table.OdfTableRow(odfContentDom_<%=cid %>);
+<%
+			// Add empty columns in X absolute position 
+			if (firstCellYAbsolute) {
+				for (int i = 0; i < Integer.parseInt(firstCellXStr); i++) {
+%>
+			odfTableCell_<%=cid %> = new org.odftoolkit.odfdom.doc.table.OdfTableCell(odfContentDom_<%=cid %>);
+			odfTableRow_<%=cid %>.appendCell(odfTableCell_<%=cid %>);
+<%
+				}
+			}
+			for (int i = 0; i < columns.size(); i++) {
+				IMetadataColumn column = columns.get(i);
+%>
+				odfTableCell_<%=cid %> = new org.odftoolkit.odfdom.doc.table.OdfTableCell(odfContentDom_<%=cid %>);
+				odfTableCell_<%=cid %>.setOfficeStringValueAttribute("<%=column.getLabel() %>");
+				odfTableCell_<%=cid %>.setOfficeValueTypeAttribute(org.odftoolkit.odfdom.dom.attribute.office.OfficeValueTypeAttribute.Value.STRING.toString());
+				odfTableRow_<%=cid %>.appendCell(odfTableCell_<%=cid %>);
+<%
+			}
+%>
+			odfTable_<%=cid %>.appendRow(odfTableRow_<%=cid %>);
+			nb_line_<%=cid %>++;
+<%
+		}
+	}
+}
+%>

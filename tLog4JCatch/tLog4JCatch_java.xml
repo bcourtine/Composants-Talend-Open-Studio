@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<COMPONENT> 
+	<HEADER 
+			AUTHOR="Benoit Courtine"
+			COMPATIBILITY="ALL"
+			DATA_AUTO_PROPAGATE="true"
+			PLATEFORM="ALL"
+			RELEASE_DATE="20091030A"
+			SERIAL=""
+			STARTABLE="false"
+			STATUS="ALPHA"
+			VERSION="1.1"
+			HAS_CONDITIONAL_OUTPUTS="false"
+	>
+		<SIGNATURE/> 
+	</HEADER>
+
+	<FAMILIES> 
+		<FAMILY>Logs_Errors/Log4J</FAMILY> 
+	</FAMILIES>
+
+	<DOCUMENTATION> 
+		<URL/> 
+	</DOCUMENTATION>
+
+	<CONNECTORS> 
+		<CONNECTOR CTYPE="FLOW" MAX_INPUT="1"/> 
+		<CONNECTOR CTYPE="ITERATE" MAX_OUTPUT="0" MAX_INPUT="0"/>
+		<CONNECTOR CTYPE="THEN_RUN" MAX_INPUT="1"/>
+		<CONNECTOR CTYPE="REFERENCE"/>
+		<CONNECTOR CTYPE="COMPONENT_OK"/>
+		<CONNECTOR CTYPE="COMPONENT_ERROR"/>
+		<CONNECTOR CTYPE="RUN_IF"/>
+	</CONNECTORS>
+
+	<PARAMETERS> 
+		<PARAMETER NAME="SCHEMA" FIELD="SCHEMA_TYPE" REQUIRED="true" NUM_ROW="1" >
+			<TABLE READONLY="true">
+				<COLUMN NAME="moment" TYPE="id_Date" PATTERN='"yyyy-MM-dd HH:mm:ss"'/>
+				<COLUMN NAME="pid" TYPE="id_String" LENGTH="20"/>
+				<COLUMN NAME="root_pid" TYPE="id_String" LENGTH="20"/>
+				<COLUMN NAME="father_pid" TYPE="id_String" LENGTH="20"/>
+				<COLUMN NAME="project" TYPE="id_String" LENGTH="50"/>
+				<COLUMN NAME="job" TYPE="id_String" LENGTH="255"/>
+				<COLUMN NAME="context" TYPE="id_String" LENGTH="50"/>
+				<COLUMN NAME="priority" TYPE="id_Integer" LENGTH="3"/>
+				<COLUMN NAME="type" TYPE="id_String" LENGTH="255"/>
+				<COLUMN NAME="origin" TYPE="id_String" LENGTH="255"/>
+				<COLUMN NAME="message" TYPE="id_String" LENGTH="255"/>
+				<COLUMN NAME="code" TYPE="id_Integer" LENGTH="3"/>
+			</TABLE>
+		</PARAMETER>
+
+		<PARAMETER
+				NAME="LOG4J_MESSAGE"
+				FIELD="TEXT"
+				REQUIRED="true"
+				NUM_ROW="4"
+		>
+			<DEFAULT>"Hello log message"</DEFAULT>
+		</PARAMETER>
+
+	</PARAMETERS>  
+	<ADVANCED_PARAMETERS>
+		<PARAMETER
+				NAME="USE_SPECIFIC_LOGGER"
+				FIELD="CHECK"
+				NUM_ROW="2"
+		>
+			<DEFAULT>false</DEFAULT>
+		</PARAMETER>
+
+		<PARAMETER
+				NAME="LOG4J_LOGGER"
+				FIELD="TEXT" 
+				NUM_ROW="2"
+				SHOW_IF="USE_SPECIFIC_LOGGER == 'true'"
+		>
+			<DEFAULT>"root"</DEFAULT>
+		</PARAMETER>
+	</ADVANCED_PARAMETERS>
+
+	<CODEGENERATION>
+		<IMPORTS> 
+			<IMPORT MODULE="log4j-1.2.15.jar" NAME="log4j-1.2.15" REQUIRED="true"/>
+		</IMPORTS> 
+	</CODEGENERATION>
+
+	<RETURNS> 
+		<RETURN AVAILABILITY="AFTER" NAME="NB_LINE" TYPE="id_Integer"/>
+	</RETURNS> 
+</COMPONENT>

@@ -1,0 +1,21 @@
+<%@ jet 
+	imports="
+		org.talend.core.model.process.INode 
+		org.talend.core.model.process.ElementParameterParser
+		org.talend.designer.codegen.config.CodeGeneratorArgument
+	" 
+%>
+<% 
+    CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
+    INode node = (INode)codeGenArgument.getArgument();
+    String cid = node.getUniqueName();
+    String log4JLogger = ElementParameterParser.getValue(node,"__LOG4J_LOGGER__");
+    String useSpecificLogger = ElementParameterParser.getValue(node,"__USE_SPECIFIC_LOGGER__");
+%>
+
+<% if (useSpecificLogger.equals("true")) { %>
+org.apache.log4j.Logger logger_<%=cid%> = org.apache.log4j.Logger.getLogger(<%=log4JLogger%>);
+<% } else { %>
+org.apache.log4j.Logger logger_<%=cid%> = org.apache.log4j.Logger.getLogger(this.getClass());
+<% } %>
+int nb_line_<%=cid%> = 0;

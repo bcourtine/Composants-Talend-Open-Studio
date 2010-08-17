@@ -1,0 +1,121 @@
+<%@ jet 
+	imports="
+		org.talend.core.model.process.INode 
+		org.talend.core.model.metadata.IMetadataTable
+		org.talend.core.model.metadata.IMetadataColumn
+		org.talend.core.model.process.IConnection
+		org.talend.core.model.process.IConnectionCategory 
+		org.talend.designer.codegen.config.CodeGeneratorArgument
+		org.talend.core.model.metadata.types.JavaTypesManager
+		org.talend.core.model.metadata.types.JavaType
+		org.talend.core.model.process.ElementParameterParser		
+		java.util.List
+	"
+%>
+<%
+CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
+INode node = (INode)codeGenArgument.getArgument();
+
+String cid = node.getUniqueName();
+String advancedSeparatorStr = ElementParameterParser.getValue(node, "__ADVANCED_SEPARATOR__");
+boolean advancedSeparator = (advancedSeparatorStr!=null&&!("").equals(advancedSeparatorStr))?("true").equals(advancedSeparatorStr):false;
+String thousandsSeparator = ElementParameterParser.getValueWithJavaType(node, "__THOUSANDS_SEPARATOR__", JavaTypesManager.CHARACTER);
+String decimalSeparator = ElementParameterParser.getValueWithJavaType(node, "__DECIMAL_SEPARATOR__", JavaTypesManager.CHARACTER); 
+String font = ElementParameterParser.getValue(node, "__FONT__"); 
+boolean firstCellYAbsolute = ("true").equals(ElementParameterParser.getValue(node, "__FIRST_CELL_Y_ABSOLUTE__"));
+String firstCellXStr = ElementParameterParser.getValue(node, "__FIRST_CELL_X__");
+String firstCellYStr = ElementParameterParser.getValue(node, "__FIRST_CELL_Y__");
+boolean keepCellFormating =  ElementParameterParser.getValue(node, "__KEEP_CELL_FORMATING__").equals("true");
+List<IMetadataTable> metadatas = node.getMetadataList();
+if ((metadatas!=null)&&(metadatas.size()>0)) {
+	IMetadataTable metadata = metadatas.get(0);
+	if (metadata!=null) {
+		List<IMetadataColumn> columns = metadata.getListColumns();
+
+		List< ? extends IConnection> conns = node.getIncomingConnections();
+		for (IConnection conn : conns) {
+			if (conn.getLineStyle().hasConnectionCategory(IConnectionCategory.DATA)) {
+				int sizeColumns = columns.size();
+				%>
+				odfTableRow_<%=cid %> = new org.odftoolkit.odfdom.doc.table.OdfTableRow(odfContentDom_<%=cid %>);
+				
+				<%
+				// Add empty columns in X absolute position 
+				if (firstCellYAbsolute) {
+					for (int i = 0; i < Integer.parseInt(firstCellXStr); i++) {
+				%>
+				odfTableCell_<%=cid %> = new org.odftoolkit.odfdom.doc.table.OdfTableCell(odfContentDom_<%=cid %>);
+				odfTableRow_<%=cid %>.appendCell(odfTableCell_<%=cid %>);
+				<%
+					}
+				}
+				for (int i = 0; i < sizeColumns; i++) {
+					IMetadataColumn column = columns.get(i);
+					// Cell creation
+					%>
+					odfTableCell_<%=cid %> = new org.odftoolkit.odfdom.doc.table.OdfTableCell(odfContentDom_<%=cid %>);
+					<%
+					JavaType javaType = JavaTypesManager.getJavaTypeFromId(column.getTalendType());
+					boolean isPrimitive = JavaTypesManager.isJavaPrimitiveType(javaType, column.isNullable());
+
+					//Detect the format required for the cell
+					if (javaType == JavaTypesManager.BOOLEAN) {
+					%>
+						odfTableCell_<%=cid %>.setOfficeValueTypeAttribute(org.odftoolkit.odfdom.dom.attribute.office.OfficeValueTypeAttribute.Value.BOOLEAN.toString());
+						<% if (isPrimitive) { %>
+						odfTableCell_<%=cid %>.setOfficeBooleanValueAttribute(Boolean.valueOf(<%=conn.getName() %>.<%=column.getLabel() %>));
+						<% } else { %>
+						odfTableCell_<%=cid %>.setOfficeBooleanValueAttribute(<%=conn.getName() %>.<%=column.getLabel() %>);
+						<% } %>
+					<% } else if (javaType == JavaTypesManager.DATE) { // TODO Type et pattern des dates a gerer %>
+						odfTableCell_<%=cid %>.setOfficeValueTypeAttribute(org.odftoolkit.odfdom.dom.attribute.office.OfficeValueTypeAttribute.Value.STRING.toString());
+						if(<%=conn.getName() %>.<%=column.getLabel() %> != null) {
+							odfTableCell_<%=cid %>.setOfficeStringValueAttribute(<%=conn.getName() %>.<%=column.getLabel() %>.toString());
+						}
+					<% } else if (javaType == JavaTypesManager.CHARACTER) { %>
+						odfTableCell_<%=cid %>.setOfficeValueTypeAttribute(org.odftoolkit.odfdom.dom.attribute.office.OfficeValueTypeAttribute.Value.STRING.toString());
+						<% if (isPrimitive) { %>
+							odfTableCell_<%=cid %>.setOfficeStringValueAttribute(String.valueOf(<%=conn.getName() %>.<%=column.getLabel() %>));
+						<% } else { %>
+							if (<%=conn.getName() %>.<%=column.getLabel() %> != null) {
+								odfTableCell_<%=cid %>.setOfficeStringValueAttribute(<%=conn.getName() %>.<%=column.getLabel() %>.toString());
+							}
+						<% }
+					} else if(javaType == JavaTypesManager.BYTE_ARRAY) { %>
+						odfTableCell_<%=cid %>.setOfficeValueTypeAttribute(org.odftoolkit.odfdom.dom.attribute.office.OfficeValueTypeAttribute.Value.STRING.toString());
+						if(<%=conn.getName() %>.<%=column.getLabel() %> != null) {
+							odfTableCell_<%=cid %>.setOfficeStringValueAttribute(java.nio.charset.Charset.defaultCharset().decode(java.nio.ByteBuffer.wrap(<%=conn.getName() %>.<%=column.getLabel() %>)).toString());
+						}
+					<% } else if (javaType == JavaTypesManager.STRING || javaType == JavaTypesManager.OBJECT) { %>
+						odfTableCell_<%=cid %>.setOfficeValueTypeAttribute(org.odftoolkit.odfdom.dom.attribute.office.OfficeValueTypeAttribute.Value.STRING.toString());
+						if(<%=conn.getName() %>.<%=column.getLabel() %> != null) {
+							odfTableCell_<%=cid %>.setOfficeStringValueAttribute(<%=conn.getName() %>.<%=column.getLabel() %>.toString());
+						}
+					<% } else if (javaType == JavaTypesManager.BIGDECIMAL) { %>
+						odfTableCell_<%=cid %>.setOfficeValueTypeAttribute(org.odftoolkit.odfdom.dom.attribute.office.OfficeValueTypeAttribute.Value.FLOAT.toString());
+						if(<%=conn.getName() %>.<%=column.getLabel() %> != null) {
+							odfTableCell_<%=cid %>.setOfficeValueAttribute(<%=conn.getName() %>.<%=column.getLabel() %>.doubleValue());
+						}
+					<% } else { // Number value TODO Pattern des nombres a gerer %>
+						odfTableCell_<%=cid %>.setOfficeValueTypeAttribute(org.odftoolkit.odfdom.dom.attribute.office.OfficeValueTypeAttribute.Value.FLOAT.toString());
+						<% if (isPrimitive) { %>
+							odfTableCell_<%=cid %>.setOfficeValueAttribute(Double.valueOf(<%=conn.getName() %>.<%=column.getLabel() %>).doubleValue());
+						<% } else { %>
+							if(<%=conn.getName() %>.<%=column.getLabel() %> != null) {
+								odfTableCell_<%=cid %>.setOfficeValueAttribute(<%=conn.getName() %>.<%=column.getLabel() %>.doubleValue());
+							}
+						<% } 
+					}
+					%>
+					odfTableRow_<%=cid %>.appendCell(odfTableCell_<%=cid %>);	
+				<%
+				}
+				%>
+				odfTable_<%=cid %>.appendRow(odfTableRow_<%=cid %>);
+				nb_line_<%=cid %>++;
+	<%
+			}
+		}
+	}
+}
+%>

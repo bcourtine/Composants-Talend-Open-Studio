@@ -1,0 +1,282 @@
+<%@ jet 
+	imports="
+		org.talend.core.model.process.INode 
+		org.talend.core.model.process.ElementParameterParser 
+		org.talend.core.model.metadata.IMetadataTable  
+		org.talend.designer.codegen.config.CodeGeneratorArgument
+		java.util.List
+		java.util.Map
+	" 
+%>
+//tFileList_Begin
+<%
+	CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
+	INode node = (INode)codeGenArgument.getArgument();
+	String cid = node.getUniqueName();
+	boolean incldSubdir = ElementParameterParser.getValue(node, "__INCLUDSUBDIR__").equals("true");
+	String filelistType = ElementParameterParser.getValue(node, "__LIST_MODE__");
+	boolean useGlob = ElementParameterParser.getValue(node, "__GLOBEXPRESSIONS__").equals("true");
+	boolean case_sensitive = ElementParameterParser.getValue(node, "__CASE_SENSITIVE__").equals("YES");
+	List<Map<String, String>> files = (List<Map<String,String>>)ElementParameterParser.getObjectValue(node, "__FILES__");
+	List<Map<String, String>> excludeFiles = (List<Map<String,String>>)ElementParameterParser.getObjectValue(node, "__EXCLUDEFILES__");
+
+	boolean toSlash = ElementParameterParser.getValue(node, "__FORMAT_FILEPATH_TO_SLASH__").equals("true");
+
+	String folderOrder = ElementParameterParser.getValue(node, "__FOLDER_ORDER__");
+	boolean sortFiles = ("true").equals(ElementParameterParser.getValue(node, "__SORT_FILES__"));
+	String sortOrder = ElementParameterParser.getValue(node, "__SORT_ORDER__");
+	boolean ascending = ("false").equals(ElementParameterParser.getValue(node, "__REVERSE_ORDER__"));
+%>
+
+String directory_<%=cid%> = <%=ElementParameterParser.getValue(node, "__DIRECTORY__") %>;
+
+java.util.List<java.util.regex.Pattern> maskList_<%=cid %> = new java.util.ArrayList<java.util.regex.Pattern>();
+java.util.List<java.util.regex.Pattern> excludeMaskList_<%=cid %> = new java.util.ArrayList<java.util.regex.Pattern>();
+
+<%
+if(files.size() == 0){
+%>
+	maskList_<%=cid %>.add(java.util.regex.Pattern.compile(".*"));
+<%
+}
+
+for (Map<String, String> line : files) {
+	if(useGlob) {
+		if(case_sensitive) {
+		%> 
+			maskList_<%=cid %>.add(
+				java.util.regex.Pattern.compile(
+					org.apache.oro.text.GlobCompiler.globToPerl5(
+						<%= line.get("FILEMASK") %>.toCharArray(),
+						org.apache.oro.text.GlobCompiler.DEFAULT_MASK
+					)
+				)
+			);
+		<%
+		} else {
+		%>
+			maskList_<%=cid %>.add(
+				java.util.regex.Pattern.compile(
+					org.apache.oro.text.GlobCompiler.globToPerl5(
+						<%= line.get("FILEMASK") %>.toCharArray(),
+						org.apache.oro.text.GlobCompiler.DEFAULT_MASK
+					),
+					java.util.regex.Pattern.CASE_INSENSITIVE
+				)
+			);
+		
+		<%
+		}
+	} else {
+		if(case_sensitive) {
+		%>
+			maskList_<%=cid %>.add(
+				java.util.regex.Pattern.compile(
+					<%= line.get("FILEMASK") %>
+				)
+			);
+		<%
+		} else {
+		%>
+			maskList_<%=cid %>.add(
+				java.util.regex.Pattern.compile(
+					<%= line.get("FILEMASK") %>,
+					java.util.regex.Pattern.CASE_INSENSITIVE
+				)
+			);
+		<%
+		}
+	}
+}
+
+for (Map<String, String> line : excludeFiles) {
+	if(useGlob) {
+		if(case_sensitive) {
+		%>
+			excludeMaskList_<%=cid %>.add(
+				java.util.regex.Pattern.compile(
+					org.apache.oro.text.GlobCompiler.globToPerl5(
+						<%= line.get("FILEMASK") %>.toCharArray(),
+						org.apache.oro.text.GlobCompiler.DEFAULT_MASK
+					)
+				)
+			);
+		<%
+		} else {
+		%>
+			excludeMaskList_<%=cid %>.add(
+				java.util.regex.Pattern.compile(
+					org.apache.oro.text.GlobCompiler.globToPerl5(
+						<%= line.get("FILEMASK") %>.toCharArray(),
+						org.apache.oro.text.GlobCompiler.DEFAULT_MASK
+					),
+					java.util.regex.Pattern.CASE_INSENSITIVE
+				)
+			);
+		
+		<%
+		}
+	} else {
+		if(case_sensitive) {
+		%>
+			excludeMaskList_<%=cid %>.add(
+				java.util.regex.Pattern.compile(
+					<%= line.get("FILEMASK") %>
+				)
+			);
+		<%
+		} else {
+		%>
+			excludeMaskList_<%=cid %>.add(
+				java.util.regex.Pattern.compile(
+					<%= line.get("FILEMASK") %>,
+					java.util.regex.Pattern.CASE_INSENSITIVE
+				)
+			);
+		<%
+		}
+	}
+}
+%>
+
+int NB_FILE<%=cid%> = 0;  
+
+java.io.File file_<%=cid%> = new java.io.File(directory_<%=cid%>);
+final java.util.List<java.io.File> list_<%=cid%> = new java.util.ArrayList<java.io.File>(); 
+<%
+if(incldSubdir) {
+%>
+	file_<%=cid%>.listFiles(new java.io.FilenameFilter() {
+		public boolean accept(java.io.File dir, String name) {
+			java.io.File file = new java.io.File(dir, name);
+			<%
+			if(filelistType.equals("FILES")) {
+				%>
+				if(!file.isDirectory()) {
+					list_<%=cid%>.add(file);
+					return true;
+				} else {
+					file.listFiles(this);
+				}
+				<%
+			} else if(filelistType.equals("DIRECTORIES")) {
+				%>
+				if(!file.isDirectory()) {
+					return true;
+				} else {
+					list_<%=cid%>.add(file);
+					file.listFiles(this);
+				}
+				<%
+			} else if(filelistType.equals("BOTH")) {
+				%>
+				if(!file.isDirectory()) {
+					list_<%=cid%>.add(file);
+				} else {
+					list_<%=cid%>.add(file);
+					file.listFiles(this);
+				}
+				<%
+			}
+			%>
+			return false;
+		}
+	});
+<%} 
+else 
+{%> 
+	 file_<%=cid%>.listFiles(new java.io.FilenameFilter() {
+		 public boolean accept(java.io.File dir, String name) {
+			 java.io.File file = new java.io.File(dir, name);
+			 <%
+			 if(filelistType.equals("FILES")) {
+				 %>
+				 if(!file.isDirectory()) {
+					 list_<%=cid%>.add(file);
+				 }
+				 <%
+			 } else if(filelistType.equals("DIRECTORIES")) {
+				 %>
+				 if(file.isDirectory()) {
+					 list_<%=cid%>.add(file);
+				 }
+				 <%
+			 } else if(filelistType.equals("BOTH")) {
+				 %>
+				 list_<%=cid%>.add(file);
+				 <%
+			 }
+			 %>
+			 return true;
+		 }
+	 });
+<%
+}
+
+/* Ordre du tri. */
+if(!filelistType.equals("BOTH")) {
+	folderOrder = "NOSORT";
+}
+if(sortFiles) {
+	if(sortOrder.equals("FILENAME")) {
+	%>
+		java.util.Comparator comparator_<%=cid%> = new org.courtine.utils.file.comparator.FileNameComparator(
+			org.courtine.utils.file.comparator.FolderOrder.<%=folderOrder%>, <%=ascending%>, true
+		);
+	<% } else if(sortOrder.equals("FILESIZE")) { %>
+		java.util.Comparator comparator_<%=cid%> = new org.courtine.utils.file.comparator.FileSizeComparator(
+			org.courtine.utils.file.comparator.FolderOrder.<%=folderOrder%>, <%=ascending%>, true
+		);
+	<% } else if(sortOrder.equals("LASTMODIFIED")) { %>
+		java.util.Comparator comparator_<%=cid%> = new org.courtine.utils.file.comparator.FileLastModifiedComparator(
+			org.courtine.utils.file.comparator.FolderOrder.<%=folderOrder%>, <%=ascending%>
+		);
+	<% } %>
+	java.util.Collections.sort(list_<%=cid %>, comparator_<%=cid%>);
+<% } else { %>
+java.util.Collections.sort(list_<%=cid %>);
+<% } %>
+
+for (int i_<%=cid%> = 0; i_<%=cid%> < list_<%=cid%>.size() ; i_<%=cid%>++){
+	
+	java.io.File currentFile_<%=cid%> = list_<%=cid%>.get(i_<%=cid%>);
+	String fileName_<%=cid%> = currentFile_<%=cid%>.getName();
+	
+	boolean acceptFile_<%=cid%> = false;
+	
+	for (java.util.regex.Pattern fileNamePattern_<%=cid%> : maskList_<%=cid%>) {
+		if(fileNamePattern_<%=cid%>.matcher(fileName_<%=cid%>).matches()) {
+			acceptFile_<%=cid%> = true;
+			break;
+		}
+	}
+
+	for (java.util.regex.Pattern fileNamePattern_<%=cid%> : excludeMaskList_<%=cid%>) {
+		if(fileNamePattern_<%=cid%>.matcher(fileName_<%=cid%>).matches()) {
+			acceptFile_<%=cid%> = false;
+			break;
+		}
+	}
+
+	if(!acceptFile_<%=cid%>) {
+		continue;
+	}
+	
+	String currentFileName_<%=cid%> = currentFile_<%=cid%>.getName(); 
+	String currentFilePath_<%=cid%> = currentFile_<%=cid%>.getAbsolutePath();
+	String currentFileDirectory_<%=cid%> = currentFile_<%=cid%>.getParent();
+	String currentFileExtension_<%=cid%> = "";
+	if(currentFile_<%=cid%>.isFile() && currentFile_<%=cid%>.getName().contains(".")){
+		currentFileExtension_<%=cid%> = currentFile_<%=cid%>.getName().substring(currentFile_<%=cid%>.getName().lastIndexOf(".") + 1);
+	}
+	<%if(toSlash){%>
+		currentFilePath_<%=cid%> = currentFilePath_<%=cid%>.replaceAll("\\\\", "/");
+		currentFileDirectory_<%=cid%> = currentFileDirectory_<%=cid%>.replaceAll("\\\\", "/");
+	<%}%>   
+	NB_FILE<%=cid%>++;
+	
+	globalMap.put("<%=cid%>_CURRENT_FILE", currentFileName_<%=cid%>);
+	globalMap.put("<%=cid %>_CURRENT_FILEPATH", currentFilePath_<%=cid%>);
+	globalMap.put("<%=cid %>_CURRENT_FILEDIRECTORY", currentFileDirectory_<%=cid%>);
+	globalMap.put("<%=cid %>_CURRENT_FILEEXTENSION", currentFileExtension_<%=cid%>);
+	globalMap.put("<%=cid%>_NB_FILE", NB_FILE<%=cid%>);
