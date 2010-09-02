@@ -1,0 +1,36 @@
+<%@ jet 
+	imports="
+		org.talend.core.model.process.INode
+		org.talend.core.model.process.ElementParameterParser
+		org.talend.designer.codegen.config.CodeGeneratorArgument
+	"
+%>
+<% 
+    CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
+    INode node = (INode)codeGenArgument.getArgument();
+    String cid = node.getUniqueName();
+    String fileName = ElementParameterParser.getValue(node,"__LOGBACK_CONF_FILE__");
+    boolean clearConfig = ("true").equals(ElementParameterParser.getValue(node,"__CLEAR_CONFIG__"));
+    boolean dieOnError = ("true").equals(ElementParameterParser.getValue(node,"__DIE_ON_ERROR__"));
+%>
+
+<% if (dieOnError) { //Extension, existence, et droit de lecture du fichier %>
+java.io.File logConfFile_<%=cid%> = new java.io.File(<%=fileName%>);
+if(!<%=fileName%>.toLowerCase().endsWith(".xml")) {
+	throw new java.security.InvalidParameterException("Logback configuration file must be a 'xml' file");
+} else if((!logConfFile_<%=cid%>.exists()) || (!logConfFile_<%=cid%>.isFile())) {
+	throw new java.io.FileNotFoundException(<%=fileName%>);
+} else if (!logConfFile_<%=cid%>.canRead()) {
+	throw new java.lang.SecurityException(<%=fileName%> + " can not be read");
+}
+<% } %>
+
+ch.qos.logback.classic.LoggerContext lc_<%=cid%> = (ch.qos.logback.classic.LoggerContext) org.slf4j.LoggerFactory.getILoggerFactory();
+try {
+	ch.qos.logback.classic.joran.JoranConfigurator configurator_<%=cid%> = new ch.qos.logback.classic.joran.JoranConfigurator();
+	configurator_<%=cid%>.setContext(lc_<%=cid%>);
+	<% if (clearConfig) { %>lc_<%=cid%>.reset();<% } %>
+	configurator_<%=cid%>.doConfigure(<%=fileName%>);
+} catch (ch.qos.logback.core.joran.spi.JoranException je) {
+	<% if (dieOnError) { %>throw je;<% } %>
+}
