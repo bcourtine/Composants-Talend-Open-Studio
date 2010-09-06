@@ -6,7 +6,7 @@
 			COMPATIBILITY="ALL"
 			DATA_AUTO_PROPAGATE="true"
 			PLATEFORM="ALL"
-			RELEASE_DATE="20100901A"
+			RELEASE_DATE="20100906A"
 			SERIAL=""
 			STARTABLE="false"
 			STATUS="ALPHA"
@@ -35,23 +35,21 @@
 	</CONNECTORS>
 
 	<PARAMETERS> 
-		<PARAMETER NAME="SCHEMA" FIELD="SCHEMA_TYPE" REQUIRED="true" NUM_ROW="1">
-			<DEFAULT/>
-		</PARAMETER>
-
-		<PARAMETER
-				NAME="LOGBACK_LEVEL"
-				FIELD="CLOSED_LIST"
-				NUM_ROW="3"
-		>
-			<ITEMS DEFAULT="WARNING">
-				<ITEM NAME="TRACE" VALUE="0" />
-				<ITEM NAME="DEBUG" VALUE="1" />
-				<ITEM NAME="INFO" VALUE="2" />
-				<ITEM NAME="WARNING" VALUE="3" />
-				<ITEM NAME="ERROR" VALUE="4" />
-				<ITEM NAME="FATAL" VALUE="5" />
-			</ITEMS>
+		<PARAMETER NAME="SCHEMA" FIELD="SCHEMA_TYPE" REQUIRED="true" NUM_ROW="1" >
+			<TABLE READONLY="true">
+				<COLUMN NAME="moment" TYPE="id_Date" PATTERN='"yyyy-MM-dd HH:mm:ss"'/>
+				<COLUMN NAME="pid" TYPE="id_String" LENGTH="20"/>
+				<COLUMN NAME="root_pid" TYPE="id_String" LENGTH="20"/>
+				<COLUMN NAME="father_pid" TYPE="id_String" LENGTH="20"/>
+				<COLUMN NAME="project" TYPE="id_String" LENGTH="50"/>
+				<COLUMN NAME="job" TYPE="id_String" LENGTH="255"/>
+				<COLUMN NAME="context" TYPE="id_String" LENGTH="50"/>
+				<COLUMN NAME="priority" TYPE="id_Integer" LENGTH="3"/>
+				<COLUMN NAME="type" TYPE="id_String" LENGTH="255"/>
+				<COLUMN NAME="origin" TYPE="id_String" LENGTH="255"/>
+				<COLUMN NAME="message" TYPE="id_String" LENGTH="255"/>
+				<COLUMN NAME="code" TYPE="id_Integer" LENGTH="3"/>
+			</TABLE>
 		</PARAMETER>
 
 		<PARAMETER

@@ -1,0 +1,40 @@
+<%@ jet 
+	imports="
+		org.talend.core.model.metadata.IMetadataColumn
+        org.talend.core.model.metadata.IMetadataTable
+		org.talend.core.model.process.ElementParameterParser 
+        org.talend.core.model.process.IConnection
+        org.talend.core.model.process.IConnectionCategory
+        org.talend.core.model.process.INode
+		org.talend.designer.codegen.config.CodeGeneratorArgument
+		java.util.List
+	" 
+%>
+<%
+CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
+INode node = (INode)codeGenArgument.getArgument();
+String cid = node.getUniqueName();
+String logbackMessage = ElementParameterParser.getValue(node,"__LOGBACK_MESSAGE__");
+//get inConnName
+String inConnName = null;
+List< ? extends IConnection> inConns = node.getIncomingConnections();
+for (IConnection conn : inConns) {
+	if (conn.getLineStyle().hasConnectionCategory(IConnectionCategory.DATA)) {
+		inConnName = conn.getName();
+	}
+}
+if (inConnName == null) {
+	return ""; //return immediately, generate nothing
+}
+%>
+switch (<%=inConnName%>.priority) {
+	case 1: logger_<%=cid%>.trace(<%=logbackMessage%>); break;
+	case 2: logger_<%=cid%>.debug(<%=logbackMessage%>); break;
+	case 3: logger_<%=cid%>.info(<%=logbackMessage%>); break;
+	case 4: logger_<%=cid%>.warn(<%=logbackMessage%>); break;
+	case 5: logger_<%=cid%>.error(<%=logbackMessage%>); break;
+	case 6: logger_<%=cid%>.fatal(<%=logbackMessage%>); break;
+	default: logger_<%=cid%>.warn(<%=logbackMessage%>); break;
+}
+
+nb_line_<%=cid%>++;
