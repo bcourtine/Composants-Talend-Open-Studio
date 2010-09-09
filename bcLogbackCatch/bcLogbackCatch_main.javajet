@@ -33,7 +33,7 @@ switch (<%=inConnName%>.priority) {
 	case 3: logger_<%=cid%>.info(<%=logbackMessage%>); break;
 	case 4: logger_<%=cid%>.warn(<%=logbackMessage%>); break;
 	case 5: logger_<%=cid%>.error(<%=logbackMessage%>); break;
-	case 6: logger_<%=cid%>.fatal(<%=logbackMessage%>); break;
+	case 6: logger_<%=cid%>.error(<%=logbackMessage%>); break;
 	default: logger_<%=cid%>.warn(<%=logbackMessage%>); break;
 }
 
