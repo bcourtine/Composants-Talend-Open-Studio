@@ -6,11 +6,11 @@
 			COMPATIBILITY="ALL"
 			DATA_AUTO_PROPAGATE="false"
 			PLATEFORM="ALL"
-			RELEASE_DATE="20091105A"
+			RELEASE_DATE="20100910A"
 			SERIAL=""
 			STARTABLE="true"
 			STATUS="ALPHA"
-			VERSION="1.1"
+			VERSION="1.2"
 			HAS_CONDITIONAL_OUTPUTS="false"
 	>
 		<SIGNATURE/> 
@@ -63,7 +63,7 @@
 
 	<CODEGENERATION>
 		<IMPORTS> 
-			<IMPORT MODULE="log4j-1.2.15.jar" NAME="log4j-1.2.15" REQUIRED="true"/>
+			<IMPORT MODULE="log4j-1.2.16.jar" NAME="log4j-1.2.16" REQUIRED="true"/>
 			<IMPORT MODULE="talend-log4j-config-util.jar" NAME="talend-log4j-config-util" REQUIRED="true"/>
 		</IMPORTS>
 	</CODEGENERATION>
