@@ -11,7 +11,7 @@ INode node = (INode)codeGenArgument.getArgument();
 String cid = node.getUniqueName();
 String logbackMessage = ElementParameterParser.getValue(node,"__LOGBACK_MESSAGE__");
 String logbackLevel = ElementParameterParser.getValue(node,"__LOGBACK_LEVEL__");
-String[] logMethods = {"trace","debug","info","warn","error","fatal"};
+String[] logMethods = {"trace","debug","info","warn","error"};
 int levelValue = Integer.parseInt(logbackLevel);
 %>
 
