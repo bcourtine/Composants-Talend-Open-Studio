@@ -6,16 +6,26 @@
 	" 
 %>
 <% 
-    CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
-    INode node = (INode)codeGenArgument.getArgument();
-    String cid = node.getUniqueName();
-    String log4JLogger = ElementParameterParser.getValue(node,"__LOG4J_LOGGER__");
-    String useSpecificLogger = ElementParameterParser.getValue(node,"__USE_SPECIFIC_LOGGER__");
+	CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
+	INode node = (INode)codeGenArgument.getArgument();
+	String cid = node.getUniqueName();
+	String log4JLogger = ElementParameterParser.getValue(node,"__LOG4J_LOGGER__");
+	boolean useSpecificLogger = ("true").equals(ElementParameterParser.getValue(node,"__USE_SPECIFIC_LOGGER__"));
+	// 1.3 version
+	String[] logMethods = {"trace","debug","info","warn","error","fatal"};
+	boolean logBegin = ("true").equals(ElementParameterParser.getValue(node,"__LOG_BEGIN__"));
+	int beginLevel = Integer.parseInt(ElementParameterParser.getValue(node,"__BEGIN_LOG_LEVEL__"));
+	String beginMessage = ElementParameterParser.getValue(node,"__BEGIN_LOG_MESSAGE__");
 %>
 
-<% if (useSpecificLogger.equals("true")) { %>
+<% if (useSpecificLogger) { %>
 org.apache.log4j.Logger logger_<%=cid%> = org.apache.log4j.Logger.getLogger(<%=log4JLogger%>);
 <% } else { %>
 org.apache.log4j.Logger logger_<%=cid%> = org.apache.log4j.Logger.getLogger(this.getClass());
 <% } %>
+
+<% if (logBegin) { %>
+logger_<%=cid%>.<%=logMethods[beginLevel]%>(<%=beginMessage%>);
+<% } %>
+
 int nb_line_<%=cid%> = 0;
