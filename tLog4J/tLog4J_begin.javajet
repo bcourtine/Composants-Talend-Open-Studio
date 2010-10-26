@@ -29,3 +29,4 @@ logger_<%=cid%>.<%=logMethods[beginLevel]%>(<%=beginMessage%>);
 <% } %>
 
 int nb_line_<%=cid%> = 0;
+int nb_logged_line_<%=cid%> = 0;

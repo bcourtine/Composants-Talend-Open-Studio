@@ -18,6 +18,7 @@
 %>
 
 globalMap.put("<%=cid %>_NB_LINE",nb_line_<%=cid%>);
+globalMap.put("<%=cid %>_NB_LOGGED_LINE",nb_logged_line_<%=cid%>);
 
 <% if (logEnd) { %>
 logger_<%=cid%>.<%=logMethods[endLevel]%>(<%=endMessage%>);
