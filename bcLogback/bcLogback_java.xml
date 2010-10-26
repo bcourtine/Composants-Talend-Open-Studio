@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<COMPONENT> 
-	<HEADER 
+<COMPONENT>
+	<HEADER
 			AUTHOR="Benoit Courtine"
 			COMPATIBILITY="ALL"
 			DATA_AUTO_PROPAGATE="true"
@@ -13,19 +13,19 @@
 			VERSION="1.2"
 			HAS_CONDITIONAL_OUTPUTS="false"
 	>
-		<SIGNATURE/> 
+		<SIGNATURE/>
 	</HEADER>
 
-	<FAMILIES> 
-		<FAMILY>Logs_Errors/Logback</FAMILY> 
+	<FAMILIES>
+		<FAMILY>Logs_Errors/Logback</FAMILY>
 	</FAMILIES>
 
-	<DOCUMENTATION> 
-		<URL/> 
+	<DOCUMENTATION>
+		<URL/>
 	</DOCUMENTATION>
 
-	<CONNECTORS> 
-		<CONNECTOR CTYPE="FLOW" MAX_INPUT="1"/> 
+	<CONNECTORS>
+		<CONNECTOR CTYPE="FLOW" MAX_INPUT="1"/>
 		<CONNECTOR CTYPE="ITERATE" MAX_OUTPUT="0" MAX_INPUT="0"/>
 		<CONNECTOR CTYPE="THEN_RUN" MAX_INPUT="1"/>
 		<CONNECTOR CTYPE="REFERENCE"/>
@@ -34,7 +34,7 @@
 		<CONNECTOR CTYPE="RUN_IF"/>
 	</CONNECTORS>
 
-	<PARAMETERS> 
+	<PARAMETERS>
 		<PARAMETER NAME="SCHEMA" FIELD="SCHEMA_TYPE" REQUIRED="true" NUM_ROW="1">
 			<DEFAULT/>
 		</PARAMETER>
@@ -91,7 +91,7 @@
 
 		<PARAMETER
 				NAME="LOGBACK_LOGGER"
-				FIELD="TEXT" 
+				FIELD="TEXT"
 				NUM_ROW="2"
 				SHOW_IF="USE_SPECIFIC_LOGGER == 'true'"
 		>
@@ -166,15 +166,15 @@
 	</ADVANCED_PARAMETERS>
 
 	<CODEGENERATION>
-		<IMPORTS> 
-			<IMPORT MODULE="logback-core-0.9.24.jar" NAME="logback-core-0.9.24" REQUIRED="true"/>
-			<IMPORT MODULE="logback-classic-0.9.24.jar" NAME="logback-classic-0.9.24" REQUIRED="true"/>
-			<IMPORT MODULE="slf4j-api-1.6.0.jar" NAME="slf4j-api-1.6.0" REQUIRED="true"/>
+		<IMPORTS>
+			<IMPORT MODULE="logback-core-0.9.26.jar" NAME="logback-core-0.9.26" REQUIRED="true"/>
+			<IMPORT MODULE="logback-classic-0.9.26.jar" NAME="logback-classic-0.9.26" REQUIRED="true"/>
+			<IMPORT MODULE="slf4j-api-1.6.1.jar" NAME="slf4j-api-1.6.1" REQUIRED="true"/>
 		</IMPORTS>
 	</CODEGENERATION>
 
-	<RETURNS> 
+	<RETURNS>
 		<RETURN AVAILABILITY="AFTER" NAME="NB_LINE" TYPE="id_Integer"/>
 		<RETURN AVAILABILITY="AFTER" NAME="NB_LOGGED_LINE" TYPE="id_Integer"/>
-	</RETURNS> 
+	</RETURNS>
 </COMPONENT>

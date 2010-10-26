@@ -1,31 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<COMPONENT> 
-	<HEADER 
+<COMPONENT>
+	<HEADER
 			AUTHOR="Benoit Courtine"
 			COMPATIBILITY="ALL"
 			DATA_AUTO_PROPAGATE="true"
 			PLATEFORM="ALL"
-			RELEASE_DATE="20100902A"
+			RELEASE_DATE="20101026A"
 			SERIAL=""
 			STARTABLE="true"
 			STATUS="ALPHA"
-			VERSION="1.0"
+			VERSION="1.1"
 			HAS_CONDITIONAL_OUTPUTS="false"
 	>
-		<SIGNATURE/> 
+		<SIGNATURE/>
 	</HEADER>
 
-	<FAMILIES> 
-		<FAMILY>Logs_Errors/Logback</FAMILY> 
+	<FAMILIES>
+		<FAMILY>Logs_Errors/Logback</FAMILY>
 	</FAMILIES>
 
-	<DOCUMENTATION> 
-		<URL/> 
+	<DOCUMENTATION>
+		<URL/>
 	</DOCUMENTATION>
 
-	<CONNECTORS> 
-		<CONNECTOR CTYPE="FLOW" MAX_INPUT="1"/> 
+	<CONNECTORS>
+		<CONNECTOR CTYPE="FLOW" MAX_INPUT="1"/>
 		<CONNECTOR CTYPE="ITERATE" MAX_OUTPUT="0" MAX_INPUT="0"/>
 		<CONNECTOR CTYPE="THEN_RUN" MAX_INPUT="1"/>
 		<CONNECTOR CTYPE="REFERENCE"/>
@@ -34,17 +34,18 @@
 		<CONNECTOR CTYPE="RUN_IF"/>
 	</CONNECTORS>
 
-	<PARAMETERS> 
-		<PARAMETER NAME="LOGBACK_CONF_FILE" FIELD="FILE" 
-				REQUIRED="true" 
+	<PARAMETERS>
+		<PARAMETER NAME="LOGBACK_CONF_FILE" FIELD="FILE"
+				REQUIRED="true"
 				NUM_ROW="1"
-				REPOSITORY_VALUE="FILE_PATH">
+				REPOSITORY_VALUE="FILE_PATH"
+		>
 			<DEFAULT>"logback.xml"</DEFAULT>
 		</PARAMETER>
-		
+
 		<PARAMETER
 				NAME="DIE_ON_ERROR"
-				FIELD="CHECK" 
+				FIELD="CHECK"
 				NUM_ROW="2"
 		>
 			<DEFAULT>true</DEFAULT>
@@ -62,13 +63,13 @@
 	</ADVANCED_PARAMETERS>
 
 	<CODEGENERATION>
-		<IMPORTS> 
-			<IMPORT MODULE="logback-core-0.9.24.jar" NAME="logback-core-0.9.24" REQUIRED="true"/>
-			<IMPORT MODULE="logback-classic-0.9.24.jar" NAME="logback-classic-0.9.24" REQUIRED="true"/>
-			<IMPORT MODULE="slf4j-api-1.6.0.jar" NAME="slf4j-api-1.6.0" REQUIRED="true"/>
-		</IMPORTS> 
+		<IMPORTS>
+			<IMPORT MODULE="logback-core-0.9.26.jar" NAME="logback-core-0.9.26" REQUIRED="true"/>
+			<IMPORT MODULE="logback-classic-0.9.26.jar" NAME="logback-classic-0.9.26" REQUIRED="true"/>
+			<IMPORT MODULE="slf4j-api-1.6.1.jar" NAME="slf4j-api-1.6.1" REQUIRED="true"/>
+		</IMPORTS>
 	</CODEGENERATION>
 
 	<RETURNS>
-	</RETURNS> 
+	</RETURNS>
 </COMPONENT>
