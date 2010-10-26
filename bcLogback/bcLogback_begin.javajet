@@ -11,7 +11,7 @@
     String cid = node.getUniqueName();
     String logbackLogger = ElementParameterParser.getValue(node,"__LOGBACK_LOGGER__");
     boolean useSpecificLogger = ("true").equals(ElementParameterParser.getValue(node,"__USE_SPECIFIC_LOGGER__"));
-	// 1.2 version
+	// Version 1.2
 	String[] logMethods = {"trace","debug","info","warn","error"};
 	boolean logBegin = ("true").equals(ElementParameterParser.getValue(node,"__LOG_BEGIN__"));
 	int beginLevel = Integer.parseInt(ElementParameterParser.getValue(node,"__BEGIN_LOG_LEVEL__"));
@@ -29,3 +29,4 @@ logger_<%=cid%>.<%=logMethods[beginLevel]%>(<%=beginMessage%>);
 <% } %>
 
 int nb_line_<%=cid%> = 0;
+int nb_logged_line_<%=cid%> = 0;

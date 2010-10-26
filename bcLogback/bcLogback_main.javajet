@@ -10,10 +10,20 @@ CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
 INode node = (INode)codeGenArgument.getArgument();
 String cid = node.getUniqueName();
 String logbackMessage = ElementParameterParser.getValue(node,"__LOGBACK_MESSAGE__");
-String logbackLevel = ElementParameterParser.getValue(node,"__LOGBACK_LEVEL__");
+int levelValue = Integer.parseInt(ElementParameterParser.getValue(node,"__LOGBACK_LEVEL__"));
 String[] logMethods = {"trace","debug","info","warn","error"};
-int levelValue = Integer.parseInt(logbackLevel);
+// Version 1.2
+boolean conditionalLog = ("true").equals(ElementParameterParser.getValue(node,"__CONDITIONAL_LOG__"));
+String logCondition = ElementParameterParser.getValue(node,"__LOG_CONDITION__");
 %>
 
+<% if (conditionalLog) { %>
+if (<%=logCondition%>) {
+<% } %>
 logger_<%=cid%>.<%=logMethods[levelValue]%>(<%=logbackMessage%>);
+nb_logged_line_<%=cid%>++;
+<% if (conditionalLog) { %>
+}
+<% } %>
+
 nb_line_<%=cid%>++;

@@ -10,7 +10,7 @@
     CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
     INode node = (INode)codeGenArgument.getArgument();
     String cid = node.getUniqueName();
-	// 1.2 version
+	// Version 1.2
 	String[] logMethods = {"trace","debug","info","warn","error"};
 	boolean logEnd = ("true").equals(ElementParameterParser.getValue(node,"__LOG_END__"));
 	int endLevel = Integer.parseInt(ElementParameterParser.getValue(node,"__END_LOG_LEVEL__"));
@@ -18,6 +18,7 @@
 %>
 
 globalMap.put("<%=cid %>_NB_LINE",nb_line_<%=cid%>);
+globalMap.put("<%=cid %>_NB_LOGGED_LINE",nb_logged_line_<%=cid%>);
 
 <% if (logEnd) { %>
 logger_<%=cid%>.<%=logMethods[endLevel]%>(<%=endMessage%>);
