@@ -1,0 +1,237 @@
+<%@ jet 
+%>
+<%  
+//issue 0010346 Parallelization crash with "Drop table if exists and create"
+Boolean isParallelize ="true".equalsIgnoreCase(ElementParameterParser.getValue(node, "__PARALLELIZE__"));
+String dbms=ElementParameterParser.getValue(node, "__TYPE__");
+if (!isParallelize) {
+//end issue 0010346 Parallelization crash with "Drop table if exists and create"
+	manager = getManager(dbmsId, cid);
+	String ending="";
+	
+	if("VECTORWISE".equalsIgnoreCase(dbmsId)) {
+		ending="WITH STRUCTURE = VECTORWISE";
+	}
+
+	if(!("NONE").equals(tableAction)) {
+
+        if(("DROP_CREATE").equals(tableAction)) {
+%>            
+            java.sql.Statement stmtDrop_<%=cid%> = conn_<%=cid%>.createStatement();
+            stmtDrop_<%=cid%>.execute("<%=manager.getDropTableSQL()%>");
+            stmtDrop_<%=cid%>.close();
+            java.sql.Statement stmtCreate_<%=cid%> = conn_<%=cid%>.createStatement();
+<%
+			if(isDynamic) {
+				List< ? extends IConnection> conns_dynamic = node.getIncomingConnections();
+				if(conns_dynamic!=null && conns_dynamic.size()>0){
+					IConnection conn = conns_dynamic.get(0);
+					String query=manager.getCreateTableSQL(stmtStructure);
+					if(query.lastIndexOf("(")==query.length()-1) {
+%>
+						stmtCreate_<%=cid%>.execute("<%=query%>"+DynamicUtils.getCreateTableSQL(<%=conn.getName()%>.<%=columnList.get(columnList.size()-1)%>, "<%=dbms==null?"":dbms.toLowerCase()%>_id")+")<%=ending%>");
+<%
+					} else {
+%>				
+					stmtCreate_<%=cid%>.execute("<%=query%>, "+DynamicUtils.getCreateTableSQL(<%=conn.getName()%>.<%=columnList.get(columnList.size()-1)%>, "<%=dbms==null?"":dbms.toLowerCase()%>_id")+")<%=ending%>");
+<%
+					}
+				}
+			} else {
+%>
+				stmtCreate_<%=cid%>.execute("<%=manager.getCreateTableSQL(stmtStructure)%>)");
+<%
+			}
+%>
+			stmtCreate_<%=cid%>.close();
+<%				
+
+        } else if(("CREATE").equals(tableAction)) {
+%>
+            java.sql.Statement stmtCreate_<%=cid%> = conn_<%=cid%>.createStatement();
+<%
+			if(isDynamic) {
+				List< ? extends IConnection> conns_dynamic = node.getIncomingConnections();
+				if(conns_dynamic!=null && conns_dynamic.size()>0){
+					IConnection conn = conns_dynamic.get(0);
+					String query=manager.getCreateTableSQL(stmtStructure);
+					if(query.lastIndexOf("(")==query.length()-1) {
+%>
+						stmtCreate_<%=cid%>.execute("<%=query%>"+DynamicUtils.getCreateTableSQL(<%=conn.getName()%>.<%=columnList.get(columnList.size()-1)%>, "<%=dbms==null?"":dbms.toLowerCase()%>_id")+")<%=ending%>");
+<%
+					} else {
+%>				
+						stmtCreate_<%=cid%>.execute("<%=query%>, "+DynamicUtils.getCreateTableSQL(<%=conn.getName()%>.<%=columnList.get(columnList.size()-1)%>, "<%=dbms==null?"":dbms.toLowerCase()%>_id")+")<%=ending%>");
+<%
+					}
+				}
+			} else {
+%>
+				stmtCreate_<%=cid%>.execute("<%=manager.getCreateTableSQL(stmtStructure)%>)");
+<%
+			}
+%>
+            stmtCreate_<%=cid%>.close();
+<%
+        } else if(("CREATE_IF_NOT_EXISTS").equals(tableAction) || ("DROP_IF_EXISTS_AND_CREATE").equals(tableAction)) {
+%>
+<%
+			//to fixed: bug8422
+			if((cid.equals("talendLogs_DB") || cid.equals("talendStats_DB") || cid.equals("talendMeter_DB"))){
+%>	         
+		    // [%connection%][checktable][tableName]
+		    String keyCheckTable_<%=cid %> = conn_<%=cid%> + "[checktable]" + "[" + <%=table%> + "]";
+			if(GlobalResource.resourceMap.get(keyCheckTable_<%=cid %>)== null){
+<%
+			}
+%>              
+<% 
+			/*
+				case multi connection access the same db, that maybe have a locked in System table(e.g mssql).
+				so in mssql use "Select" checked the table whether exist.
+			*/
+			//TODO we will use like "select" sql intead of use system table to checked table?
+			if(MSSQL.equalsIgnoreCase(dbmsId)) {
+%>
+				java.sql.Statement isExistStmt_<%=cid%> = conn_<%=cid%>.createStatement();
+				boolean whetherExist_<%=cid%> = false;
+				try {
+					isExistStmt_<%=cid%>.execute("SELECT TOP 1 1 FROM [" +  tableName_<%=cid%> + "]" );
+					whetherExist_<%=cid%> = true;
+				} catch (Exception e){
+					whetherExist_<%=cid%> = false;
+				}
+				isExistStmt_<%=cid%>.close();
+<%
+			} else if (ORACLE.equalsIgnoreCase(dbmsId) || SYBASE.equalsIgnoreCase(dbmsId) || POSTGRESQL.equalsIgnoreCase(dbmsId)
+						|| INFORMIX.equalsIgnoreCase(dbmsId) || DB2.equalsIgnoreCase(dbmsId) ) {
+%>   
+				java.sql.DatabaseMetaData dbMetaData_<%=cid%> = conn_<%=cid%>.getMetaData();
+	            java.sql.ResultSet rsTable_<%=cid%> = dbMetaData_<%=cid%>.getTables(null, null, null, new String[]{"TABLE"});
+	            boolean whetherExist_<%=cid%> = false;
+	            while(rsTable_<%=cid%>.next()) {
+	                String table_<%=cid%> = rsTable_<%=cid%>.getString("TABLE_NAME");
+	                String schema_<%=cid%> = rsTable_<%=cid%>.getString("TABLE_SCHEM");
+	                if(table_<%=cid%>.equalsIgnoreCase(<%=table%>) 
+	                	&& (schema_<%=cid%>.equalsIgnoreCase(dbschema_<%=cid%>) || dbschema_<%=cid%>.trim().length() ==0)) {
+	                    whetherExist_<%=cid%> = true;
+	                    break;
+	                }
+	            }
+	            rsTable_<%=cid%>.close();
+<%			
+			} else {
+%>      
+	            java.sql.DatabaseMetaData dbMetaData_<%=cid%> = conn_<%=cid%>.getMetaData();
+	            java.sql.ResultSet rsTable_<%=cid%> = dbMetaData_<%=cid%>.getTables(null, null, null, new String[]{"TABLE"});
+	            boolean whetherExist_<%=cid%> = false;
+	            while(rsTable_<%=cid%>.next()) {
+	                String table_<%=cid%> = rsTable_<%=cid%>.getString("TABLE_NAME");
+	                if(table_<%=cid%>.equalsIgnoreCase(<%=table%>)) {
+	                    whetherExist_<%=cid%> = true;
+	                    break;
+	                }
+	            }
+	            rsTable_<%=cid%>.close();
+<%
+			}
+%>
+<%
+            if(("CREATE_IF_NOT_EXISTS").equals(tableAction)) {
+%>
+                if(!whetherExist_<%=cid%>) {
+                    java.sql.Statement stmtCreate_<%=cid%> = conn_<%=cid%>.createStatement();
+<%
+			if(isDynamic) {
+				List< ? extends IConnection> conns_dynamic = node.getIncomingConnections();
+				if(conns_dynamic!=null && conns_dynamic.size()>0){
+					IConnection conn = conns_dynamic.get(0);
+					String query=manager.getCreateTableSQL(stmtStructure);
+					if(query.lastIndexOf("(")==query.length()-1) {
+%>
+						stmtCreate_<%=cid%>.execute("<%=query%>"+DynamicUtils.getCreateTableSQL(<%=conn.getName()%>.<%=columnList.get(columnList.size()-1)%>, "<%=dbms==null?"":dbms.toLowerCase()%>_id")+")<%=ending%>");
+<%
+					} else {
+%>				
+						stmtCreate_<%=cid%>.execute("<%=query%>, "+DynamicUtils.getCreateTableSQL(<%=conn.getName()%>.<%=columnList.get(columnList.size()-1)%>, "<%=dbms==null?"":dbms.toLowerCase()%>_id")+")<%=ending%>");
+<%
+					}
+				}
+			} else {
+%>
+				stmtCreate_<%=cid%>.execute("<%=manager.getCreateTableSQL(stmtStructure)%>)");
+<%
+			}
+%>
+                    stmtCreate_<%=cid%>.close();            
+                }                
+<%
+            } else {
+%>
+                if(whetherExist_<%=cid%>) {
+                    java.sql.Statement stmtDrop_<%=cid%> = conn_<%=cid%>.createStatement();
+                    stmtDrop_<%=cid%>.execute("<%=manager.getDropTableSQL()%>");
+                    stmtDrop_<%=cid%>.close();
+                }
+                java.sql.Statement stmtCreate_<%=cid%> = conn_<%=cid%>.createStatement();
+<%
+			if(isDynamic) {
+				List< ? extends IConnection> conns_dynamic = node.getIncomingConnections();
+				if(conns_dynamic!=null && conns_dynamic.size()>0){
+					IConnection conn = conns_dynamic.get(0);
+					String query=manager.getCreateTableSQL(stmtStructure);
+					if(query.lastIndexOf("(")==query.length()-1) {
+%>
+						stmtCreate_<%=cid%>.execute("<%=query%>"+DynamicUtils.getCreateTableSQL(<%=conn.getName()%>.<%=columnList.get(columnList.size()-1)%>, "<%=dbms==null?"":dbms.toLowerCase()%>_id")+")<%=ending%>");
+<%
+					} else {
+%>				
+						stmtCreate_<%=cid%>.execute("<%=query%>, "+DynamicUtils.getCreateTableSQL(<%=conn.getName()%>.<%=columnList.get(columnList.size()-1)%>, "<%=dbms==null?"":dbms.toLowerCase()%>_id")+")<%=ending%>");
+<%
+					}
+				}
+			} else {
+%>
+				stmtCreate_<%=cid%>.execute("<%=manager.getCreateTableSQL(stmtStructure)%>)");
+<%
+			}
+%>
+                stmtCreate_<%=cid%>.close();
+<%
+			}
+%>
+<%
+			//to fixed: bug8422
+			if((cid.equals("talendLogs_DB") || cid.equals("talendStats_DB") || cid.equals("talendMeter_DB"))){
+%>
+				GlobalResource.resourceMap.put(keyCheckTable_<%=cid %>, true);
+			}
+<%
+			}
+%>            
+<%
+        } else if(("CLEAR").equals(tableAction)) {
+%>
+            java.sql.Statement stmtClear_<%=cid%> = conn_<%=cid%>.createStatement();
+            stmtClear_<%=cid%>.executeUpdate("<%=manager.getDeleteTableSQL()%>");
+            stmtClear_<%=cid%>.close();
+<%
+        }else if(("TRUNCATE").equals(tableAction)) {
+%>
+            java.sql.Statement stmtTruncCount_<%=cid%> = conn_<%=cid%>.createStatement();
+            java.sql.ResultSet rsTruncCount_<%=cid%> = stmtTruncCount_<%=cid%>.executeQuery("<%=manager.getSelectionSQL()%>");
+            java.sql.Statement stmtTrunc_<%=cid%> = conn_<%=cid%>.createStatement();
+            stmtTrunc_<%=cid%>.executeUpdate("<%=manager.getTruncateTableSQL()%>");
+            while(rsTruncCount_<%=cid%>.next()) {
+                deletedCount_<%=cid%> += rsTruncCount_<%=cid%>.getInt(1);
+            }
+            rsTruncCount_<%=cid%>.close();
+            stmtTruncCount_<%=cid%>.close();
+            stmtTrunc_<%=cid%>.close();            
+<%
+		}         
+	}
+//issue 0010346 Parallelization crash with "Drop table if exists and create"
+}
+//end issue 0010346 Parallelization crash with "Drop table if exists and create"
+%>

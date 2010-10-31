@@ -1,0 +1,33 @@
+<%@ jet 
+%>
+
+<%
+boolean useExistingConnection = "true".equals(ElementParameterParser.getValue(node,"__USE_EXISTING_CONNECTION__"));
+if(useExistingConnection) {
+	String connection = ElementParameterParser.getValue(node,"__CONNECTION__");
+	String conn = "conn_" + connection;
+	String schema = "dbschema_" + connection;
+	%>
+	dbschema_<%=cid%> = (String)globalMap.get("<%=schema%>");
+	java.sql.Connection conn_<%=cid%> = (java.sql.Connection)globalMap.get("<%=conn%>");
+	<%
+} else {       
+    %>
+    dbschema_<%=cid%> = <%=dbschema%>;
+    java.lang.Class.forName("net.sourceforge.jtds.jdbc.Driver");
+    String port_<%=cid%> = <%=dbport%>;
+    String dbname_<%=cid%> = <%=dbname%> ;
+    String url_<%=cid %> = "jdbc:jtds:sqlserver://" + <%=dbhost%> ; 
+    if (!"".equals(port_<%=cid%>)) {
+    	url_<%=cid %> += ":" + <%=dbport%>;
+    }
+    if (!"".equals(dbname_<%=cid%>)) {
+    	url_<%=cid%> += "//" + <%=dbname%>; 
+    }
+    url_<%=cid%> += ";appName=" + projectName + ";" + <%=dbproperties%>;
+    String dbUser_<%=cid %> = <%=dbuser%>;
+    String dbPwd_<%=cid %> = <%=dbpwd%>;
+    java.sql.Connection conn_<%=cid%> = java.sql.DriverManager.getConnection(url_<%=cid %>,dbUser_<%=cid%>,dbPwd_<%=cid%>);
+    <%
+}
+%>

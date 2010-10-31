@@ -1,0 +1,64 @@
+<%@ jet 
+imports="
+    org.talend.core.model.process.INode 
+    org.talend.core.model.process.ElementParameterParser 
+    org.talend.designer.codegen.config.CodeGeneratorArgument
+" 
+%>
+<%
+	class DefaultConnectionUtil {
+	
+		protected String cid ;
+		protected String dbproperties ;
+		protected String dbhost;
+	    protected String dbport;
+	    protected String dbname;
+	    
+	    public void beforeComponentProcess(INode node){
+	    }
+	    
+		public void createURL(INode node) {
+			cid = node.getUniqueName();
+			dbproperties = ElementParameterParser.getValue(node, "__PROPERTIES__");
+			dbhost = ElementParameterParser.getValue(node, "__HOST__");
+	    	dbport = ElementParameterParser.getValue(node, "__PORT__");
+	    	dbname = ElementParameterParser.getValue(node, "__DBNAME__");
+		}
+		
+		public String getDirverClassName(INode node){
+			return "";
+		}
+		
+		public void classForName(INode node){
+%>
+			java.lang.Class.forName("<%=this.getDirverClassName(node)%>");
+<%
+		}
+		
+		public void useShareConnection(INode node) {
+			String sharedConnectionName = ElementParameterParser.getValue(node, "__SHARED_CONNECTION_NAME__");
+%>
+			String sharedConnectionName_<%=cid%> = <%=sharedConnectionName%>;
+			conn_<%=cid%> = SharedDBConnection.getDBConnection("<%=this.getDirverClassName(node)%>",url_<%=cid%>,userName_<%=cid%> , password_<%=cid%> , sharedConnectionName_<%=cid%>);
+<%
+		}
+		
+		public void createConnection(INode node) {
+%>
+		conn_<%=cid%> = java.sql.DriverManager.getConnection(url_<%=cid%>,userName_<%=cid%>,password_<%=cid%>);
+<%
+		}
+		
+		public void setAutoCommit(INode node) {
+			boolean setAutoCommit = "true".equals(ElementParameterParser.getValue(node, "__AUTO_COMMIT__"));
+%>
+			conn_<%=cid%>.setAutoCommit(<%=setAutoCommit%>);
+<%
+		}
+		
+		public void afterComponentProcess(INode node){
+	    }
+	}//end DefaultUtil class
+	
+	DefaultConnectionUtil connUtil = new DefaultConnectionUtil();
+%>
