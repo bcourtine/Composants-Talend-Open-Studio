@@ -38,4 +38,5 @@ Les bugs et les demandes d'évolution du module sont à soumettre "sur GitHub":h
 h2. Nouveaux composants et évolutions prévus
 
 * Le composant @bcFileOutputOOSpreadsheet@ doit être complété, en particulier pour traiter correctement les données de type "Date".
-* Une série de composants @bcDataSource...@ est prévue pour lire/écrire des données fournies par une DataSource (d'un serveur d'applications).
+* Une série de composants @bcDataSource...@ est prévue pour lire/écrire des données fournies par une DataSource (d'un serveur d'applications). Le développement de ces composants peut être suivi dans la branche "datasource":http://github.com/bcourtine/Composants-Talend-Open-Studio/tree/datasource
+* Un composant @bcFileOutputSQL@ a pour but de créer un fichier script d'ordres SQL à partir des données entrantes. Le développement de ce composant peut être suivi dans la branche "bcFileOutputSQL":http://github.com/bcourtine/Composants-Talend-Open-Studio/tree/bcFileOutputSQL
