@@ -122,6 +122,7 @@ StringBuilder sb_<%=cid%> = new StringBuilder();
 %>
 fileWriter_<%=cid%>.write(sb_<%=cid%>.toString());
 fileWriter_<%=cid%>.write(<%=rowSeparator%>);
+nb_line_<%=cid%>++;
 <%
 			}
 		}

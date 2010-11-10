@@ -22,6 +22,7 @@ if ((metadatas != null) && (metadatas.size() > 0)) {
 			if (conn.getLineStyle().hasConnectionCategory(IConnectionCategory.DATA)) {
 %>
 fileWriter_<%=cid%>.close();
+globalMap.put("<%=cid%>_NB_LINE", nb_line_<%=cid%>);
 <%
 			}
 		}
