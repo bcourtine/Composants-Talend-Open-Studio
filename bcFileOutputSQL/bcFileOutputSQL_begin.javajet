@@ -3,6 +3,8 @@
 		org.talend.core.model.process.INode
 		org.talend.core.model.process.ElementParameterParser
 		org.talend.core.model.metadata.IMetadataTable
+		org.talend.core.model.process.IConnection
+		org.talend.core.model.process.IConnectionCategory
 		org.talend.designer.codegen.config.CodeGeneratorArgument
 		java.util.List
 	"
@@ -10,25 +12,26 @@
 <%
 CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
 INode node = (INode) codeGenArgument.getArgument();
-String cid = node.getUniqueName();
+final String cid = node.getUniqueName();
 
 // Extraction des paramètres utiles
-String filename = ElementParameterParser.getValue(node, "__FILENAME__");
-boolean isCreate = ("true").equals(ElementParameterParser.getValue(node, "__CREATE__" ));
-boolean isAppendFile = ("true").equals(ElementParameterParser.getValue(node, "__APPEND_FILE__" ));
+final String filename = ElementParameterParser.getValue(node, "__FILENAME__");
+final boolean isCreate = ("true").equals(ElementParameterParser.getValue(node, "__CREATE__" ));
+final boolean isAppendFile = ("true").equals(ElementParameterParser.getValue(node, "__APPEND_FILE__" ));
 
 // Génération de code uniquement en cas de connexion entrante
 List<IMetadataTable> metadatas = node.getMetadataList();
 if ((metadatas != null) && (metadatas.size() > 0)) {
 	IMetadataTable metadata = metadatas.get(0);
 	if (metadata != null) {
+		List< ? extends IConnection> conns = node.getIncomingConnections();
+		for (IConnection conn : conns) {
+			if (conn.getLineStyle().hasConnectionCategory(IConnectionCategory.DATA)) {
 %>
-
 int nb_line_<%=cid%> = 0;
 java.io.File file_<%=cid%> = new java.io.File(<%=filename%>);
-
 <%
-		if(isCreate) {
+				if(isCreate) {
 %>
 //create directory only if not exists
 java.io.File parentFile_<%=cid%> = file_<%=cid%>.getParentFile();
@@ -36,15 +39,17 @@ if (parentFile_<%=cid%> != null && !parentFile_<%=cid%>.exists()) {
 	parentFile_<%=cid%>.mkdirs();
 }
 <%
-		}
-		if (isAppendFile) {
+				}
+				if (isAppendFile) {
 %>
 java.io.FileWriter fileWriter_<%=cid%> = new java.io.FileWriter(file_<%=cid%>, true);
 <%
-		} else {
+				} else {
 %>
-java.io.FileWriter fileWriter_<%=cid%> = new java.io.FileWriter(file_<%=cid%>, true);
+java.io.FileWriter fileWriter_<%=cid%> = new java.io.FileWriter(file_<%=cid%>, false);
 <%
+				}
+			}
 		}
 	}
 }

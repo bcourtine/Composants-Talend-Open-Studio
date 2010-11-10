@@ -59,8 +59,8 @@
 		>
 			<ITEMS DEFAULT="INSERT">
 				<ITEM NAME="INSERT" VALUE="INSERT"/>
-				<!-- Implémentation ulterieure
 				<ITEM NAME="DELETE" VALUE="DELETE"/>
+				<!-- Implémentation ulterieure
 				<ITEM NAME="UPDATE" VALUE="UPDATE"/>
 				-->
 			</ITEMS>
