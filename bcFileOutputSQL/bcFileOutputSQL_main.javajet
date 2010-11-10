@@ -1,0 +1,131 @@
+<%@ jet
+	imports="
+		org.talend.core.model.process.INode
+		org.talend.core.model.process.ElementParameterParser
+		org.talend.core.model.metadata.IMetadataTable
+		org.talend.core.model.metadata.IMetadataColumn
+		org.talend.core.model.process.IConnection
+		org.talend.core.model.process.IConnectionCategory
+		org.talend.designer.codegen.config.CodeGeneratorArgument
+		java.util.List
+	"
+%>
+
+<%
+/**
+ * Classe interne composée des méthodes utilitaires permettant de générer la requête SQL
+ */
+class SqlGenerationHelper {
+
+	public void insert(String cid, String tableName, IConnection conn, List<IMetadataColumn> columns)	{
+%>
+sb_<%=cid%>.append("INSERT INTO " + <%=tableName%> + " (");
+<%
+		int columnsSize = columns.size();
+		for (int i = 0; i < columnsSize; i++) {
+			IMetadataColumn column = columns.get(i);
+			if (i > 0) {
+					// Ajout d'une virgule au delà de la première colonne
+%>
+sb_<%=cid%>.append(", ");
+<%
+			}
+%>
+sb_<%=cid%>.append("'").append("<%=column.getLabel()%>").append("'");
+<%
+		}
+%>
+sb_<%=cid%>.append(") VALUES (");
+<%
+		for (int i = 0; i < columnsSize; i++) {
+			IMetadataColumn column = columns.get(i);
+			if (i > 0) {
+				// Ajout d'une virgule au delà de la première colonne
+%>
+sb_<%=cid%>.append(", ");
+<%
+			}
+%>
+if (<%=conn.getName()%>.<%=column.getLabel()%> == null) {
+	sb_<%=cid%>.append("NULL");
+} else {
+	sb_<%=cid%>.append("'").append(<%=conn.getName()%>.<%=column.getLabel()%>).append("'");
+}
+<%
+		}
+%>
+sb_<%=cid%>.append(");");
+<%
+	}
+
+	public void delete(String cid, String tableName, IConnection conn, List<IMetadataColumn> columns)	{
+%>
+sb_<%=cid%>.append("DELETE FROM " + <%=tableName%> + " WHERE ");
+<%
+		int columnsSize = columns.size();
+		for (int i = 0; i < columnsSize; i++) {
+			IMetadataColumn column = columns.get(i);
+			if (i > 0) {
+				// Ajout du AND au delà de la première colonne de condition
+%>
+sb_<%=cid%>.append(" AND ");
+<%
+			}
+%>
+sb_<%=cid%>.append("<%=column.getLabel()%>");
+if (<%=conn.getName()%>.<%=column.getLabel()%> == null) {
+	sb_<%=cid%>.append(" IS NULL");
+} else {
+	sb_<%=cid%>.append(" = '").append(<%=conn.getName()%>.<%=column.getLabel()%>).append("'");
+}
+<%
+		}
+%>
+sb_<%=cid%>.append(";");
+<%
+	}
+}
+%>
+
+
+<%
+// Génération du code
+CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
+INode node = (INode) codeGenArgument.getArgument();
+final String cid = node.getUniqueName();
+
+// Récupération des paramètres utiles
+final String tableName = ElementParameterParser.getValue(node, "__TABLENAME__");
+final String dataAction = ElementParameterParser.getValue(node, "__DATA_ACTION__");
+final String rowSeparator = ElementParameterParser.getValue(node, "__ROWSEPARATOR__");
+
+// Génération de code uniquement en cas de connexion entrante
+List<IMetadataTable> metadatas = node.getMetadataList();
+if ((metadatas != null) && (metadatas.size() > 0)) {
+	IMetadataTable metadata = metadatas.get(0);
+	if (metadata != null) {
+		// Récupération de la liste des colonnes d'entrée
+		List<IMetadataColumn> columns = metadata.getListColumns();
+		List< ? extends IConnection> conns = node.getIncomingConnections();
+		for (IConnection conn : conns) {
+			if (conn.getLineStyle().hasConnectionCategory(IConnectionCategory.DATA)) {
+				// Construction du début de la requête SQL
+%>
+StringBuilder sb_<%=cid%> = new StringBuilder();
+<%
+				SqlGenerationHelper helper = new SqlGenerationHelper();
+				if ("INSERT".equals(dataAction)) {
+					helper.insert(cid, tableName, conn, columns);
+				} else if ("DELETE".equals(dataAction)) {
+					helper.delete(cid, tableName, conn, columns);
+				}
+%>
+fileWriter_<%=cid%>.write(sb_<%=cid%>.toString());
+fileWriter_<%=cid%>.write(<%=rowSeparator%>);
+nb_line_<%=cid%>++;
+<%
+			}
+		}
+	}
+}
+%>
