@@ -23,7 +23,40 @@ String beginDate = ElementParameterParser.getValue(node, "__BEGIN_DATE__");
 String endDate = ElementParameterParser.getValue(node, "__END_DATE__");
 String metadataPrefix = ElementParameterParser.getValue(node, "__METADATA_PREFIX__");
 String set = ElementParameterParser.getValue(node, "__SET__");
-List<Map<String, String>> header = (List<Map<String,String>>)ElementParameterParser.getObjectValue(node, "__HEADER__");
-List<Map<String, String>> metadata = (List<Map<String,String>>)ElementParameterParser.getObjectValue(node, "__METADATA__");
+List<Map<String, String>> headerMapping = (List<Map<String,String>>)ElementParameterParser.getObjectValue(node, "__HEADER__");
+List<Map<String, String>> metadataMapping = (List<Map<String,String>>)ElementParameterParser.getObjectValue(node, "__METADATA__");
 String multiSeparator = ElementParameterParser.getValue(node, "__MULTI_SEPARATOR__");
+
+// Construction d'un StringBuilder par colonne de sortie.
+List<IMetadataTable> metadatas = node.getMetadataList();
+if ((metadatas!=null)&&(metadatas.size()>0)) {
+	IMetadataTable metadata = metadatas.get(0);
+	if (metadata!=null) {
+		List<IMetadataColumn> columns = metadata.getListColumns();
+		for (IMetadataColumn column: columns) {
+%>
+StringBuilder <%=column.getLabel()%>_<%=cid%> = new StringBuilder();
+<%
+		}
+	}
+}
+%>
+
+java.util.Map<String, StringBuilder> headerMapping_<%=cid%> = new java.util.Map<String, StringBuilder> ();
+<%
+// Remplissage du "headerMatcher"
+for(Map<String,String> map: headerMapping) {
+%>
+headerMapping_<%=cid%>.put(<%=map.get("HEADER_FIELD")%>,<%=map.get("OUTPUT_COLUMN")%>_<%=cid%>);
+<%
+}
+%>
+java.util.Map<String, StringBuilder> metadataMapping_<%=cid%> = new java.util.Map<String, StringBuilder> ();
+<%
+// Remplissage du "metadataMatcher"
+for(Map<String,String> map: metadataMapping) {
+%>
+metadataMapping_<%=cid%>.put(<%=map.get("METADATA_FIELD")%>,<%=map.get("OUTPUT_COLUMN")%>_<%=cid%>);
+<%
+}
 %>
