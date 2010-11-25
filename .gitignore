@@ -3,3 +3,5 @@
 # Fichiers de configuration Idea
 .idea
 *.iml
+# Archives Zip des composants
+*.zip
