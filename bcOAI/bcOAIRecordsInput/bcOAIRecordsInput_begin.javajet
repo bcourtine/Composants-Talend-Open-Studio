@@ -14,7 +14,16 @@
 	"
 %>
 <%
-	CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
-	INode node = (INode) codeGenArgument.getArgument();
-	String cid = node.getUniqueName();
+CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
+INode node = (INode) codeGenArgument.getArgument();
+String cid = node.getUniqueName();
+
+// Extraction des paramètres
+String beginDate = ElementParameterParser.getValue(node, "__BEGIN_DATE__");
+String endDate = ElementParameterParser.getValue(node, "__END_DATE__");
+String metadataPrefix = ElementParameterParser.getValue(node, "__METADATA_PREFIX__");
+String set = ElementParameterParser.getValue(node, "__SET__");
+List<Map<String, String>> header = (List<Map<String,String>>)ElementParameterParser.getObjectValue(node, "__HEADER__");
+List<Map<String, String>> metadata = (List<Map<String,String>>)ElementParameterParser.getObjectValue(node, "__METADATA__");
+String multiSeparator = ElementParameterParser.getValue(node, "__MULTI_SEPARATOR__");
 %>
