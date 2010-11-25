@@ -37,6 +37,10 @@
 			</TABLE>
 		</PARAMETER>
 
+		<PARAMETER NAME="URL" FIELD="TEXT" REQUIRED="true" NUM_ROW="15">
+			<DEFAULT>"http://alcme.oclc.org/oaicat/OAIHandler"</DEFAULT>
+		</PARAMETER>
+
 		<!-- Criteres de filtrage du moissonnage -->
 		<PARAMETER NAME="BEGIN_DATE" FIELD="TEXT" REQUIRED="true" NUM_ROW="20">
 			<DEFAULT>""</DEFAULT>

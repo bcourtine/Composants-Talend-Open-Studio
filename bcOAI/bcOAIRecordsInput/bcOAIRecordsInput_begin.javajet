@@ -47,6 +47,7 @@ INode node = (INode) codeGenArgument.getArgument();
 String cid = node.getUniqueName();
 
 // Extraction des paramètres
+String url = ElementParameterParser.getValue(node, "__URL__");
 String beginDate = ElementParameterParser.getValue(node, "__BEGIN_DATE__");
 String endDate = ElementParameterParser.getValue(node, "__END_DATE__");
 String metadataPrefix = ElementParameterParser.getValue(node, "__METADATA_PREFIX__");
@@ -70,7 +71,7 @@ StringBuilder <%=column.getLabel()%>_<%=cid%> = new StringBuilder();
 }
 %>
 
-java.util.Map<String, StringBuilder> headerMapping_<%=cid%> = new java.util.Map<String, StringBuilder> ();
+java.util.Map<String, StringBuilder> headerMapping_<%=cid%> = new java.util.HashMap<String, StringBuilder> ();
 <%
 // Remplissage du "headerMatcher"
 for(Map<String,String> map: headerMapping) {
@@ -79,7 +80,7 @@ headerMapping_<%=cid%>.put(<%=map.get("HEADER_FIELD")%>,<%=map.get("OUTPUT_COLUM
 <%
 }
 %>
-java.util.Map<String, StringBuilder> metadataMapping_<%=cid%> = new java.util.Map<String, StringBuilder> ();
+java.util.Map<String, StringBuilder> metadataMapping_<%=cid%> = new java.util.HashMap<String, StringBuilder> ();
 <%
 // Remplissage du "metadataMatcher"
 for(Map<String,String> map: metadataMapping) {
@@ -88,3 +89,13 @@ metadataMapping_<%=cid%>.put(<%=map.get("METADATA_FIELD")%>,<%=map.get("OUTPUT_C
 <%
 }
 %>
+
+org.oclc.oai.harvester2.verb.ListRecords records_<%=cid%> = new org.oclc.oai.harvester2.verb.ListRecords(
+		<%=url%>,
+		<%=helper.talendTrimEmptyToNull(beginDate)%>,
+		<%=helper.talendTrimEmptyToNull(endDate)%>,
+		<%=helper.talendTrimEmptyToNull(set)%>,
+		<%=metadataPrefix%>
+);
+
+org.w3c.dom.Document document_<%=cid%> = records_<%=cid%>.getDocument();
