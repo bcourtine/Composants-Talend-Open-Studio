@@ -13,7 +13,35 @@
     	java.util.Map
 	"
 %>
+
 <%
+/**
+ * Classe interne de méthodes utilitaires d'aide au développement.
+ */
+class OaiHelper {
+
+	/**
+	 * Renvoie la chaîne d'entrée si celle-ci est non-vide et différente de "\"\"", null sinon.
+	 *
+	 * @param input Chaîne à traiter.
+	 * @return null si la chaîne d'entrée est null, vide, ou si elle vaut "\"\"".
+	 *         chaîne d'entrée trimée si elle est non vide.
+	 */
+	public String talendTrimEmptyToNull(String input) {
+		if (input == null) {
+			return null;
+		}
+		String result = input.trim();
+		if ("".equals(result) || "\"\"".equals(result)) {
+			return null;
+		}
+		return result;
+	}
+}
+%>
+
+<%
+OaiHelper helper = new OaiHelper();
 CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
 INode node = (INode) codeGenArgument.getArgument();
 String cid = node.getUniqueName();
