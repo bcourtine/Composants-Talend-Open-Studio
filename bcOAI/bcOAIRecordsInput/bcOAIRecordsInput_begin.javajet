@@ -112,6 +112,39 @@ for(Map<String,String> map: metadataMapping) {
 }
 %>
 
+	org.w3c.dom.NodeList currentRecordsChilds_<%=cid%> = currentRecord_<%=cid%>.getChildNodes();
+	for (int i=0;i < currentRecordsChilds_<%=cid%>.getLength(); i++) {
+		org.w3c.dom.Node currentChild_<%=cid%> = currentRecordsChilds_<%=cid%>.item(i);
+
+		// Header
+		if ("header".equals(currentChild_<%=cid%>.getNodeName())) {
+			org.w3c.dom.NodeList headerNodes_<%=cid%> = currentChild_<%=cid%>.getChildNodes();
+			for (int j = 0; j < headerNodes_<%=cid%>.getLength(); j++) {
+				org.w3c.dom.Node headerNode_<%=cid%> = headerNodes_<%=cid%>.item(j);
+				if(headerMapping_<%=cid%>.containsKey(headerNode_<%=cid%>.getNodeName())) {
+					StringBuilder sb_<%=cid%> = headerMapping_<%=cid%>.get(headerNode_<%=cid%>.getNodeName());
+					if (sb_<%=cid%>.length() != 0) {
+						sb_<%=cid%>.append(<%=multiSeparator%>);
+					}
+					sb_<%=cid%>.append(headerNode_<%=cid%>.getChildNodes().item(0).getNodeValue());
+				}
+			}
+		}
+		// Metadata
+		if ("metadata".equals(currentChild_<%=cid%>.getNodeName())) {
+			org.w3c.dom.NodeList metadataNodes_<%=cid%> = currentChild_<%=cid%>.getChildNodes();
+			for (int j = 0; j < metadataNodes_<%=cid%>.getLength(); j++) {
+				org.w3c.dom.Node metadataNode_<%=cid%> = metadataNodes_<%=cid%>.item(j);
+				if(metadataMapping_<%=cid%>.containsKey(metadataNode_<%=cid%>.getNodeName())) {
+					StringBuilder sb_<%=cid%> = metadataMapping_<%=cid%>.get(metadataNode_<%=cid%>.getNodeName());
+					if (sb_<%=cid%>.length() != 0) {
+						sb_<%=cid%>.append(<%=multiSeparator%>);
+					}
+					sb_<%=cid%>.append(metadataNode_<%=cid%>.getChildNodes().item(0).getNodeValue());
+				}
+			}
+		}
+	}
 <%
 if ((metadatas!=null) && (metadatas.size() > 0)) {
 	IMetadataTable metadata = metadatas.get(0);
