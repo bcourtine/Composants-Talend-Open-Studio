@@ -12,9 +12,32 @@
 		java.util.List
     	java.util.Map
 	"
-%>
+		%>
 <%
 	CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
 	INode node = (INode) codeGenArgument.getArgument();
 	String cid = node.getUniqueName();
+	String url = ElementParameterParser.getValue(node, "__URL__");
 %>
+
+	// Enregistrement suivant
+	if (posInCurrentRecord_<%=cid%> < records_<%=cid%>.getLength() - 1) {
+		currentRecord_<%=cid%> = records_<%=cid%>.item(++posInCurrentRecord_<%=cid%>);
+	} else {
+		String resumptionToken_<%=cid%> = listRecords_<%=cid%>.getResumptionToken();
+		if (resumptionToken_<%=cid%> != null && resumptionToken_<%=cid%>.length() != 0) {
+			listRecords_<%=cid%> = new org.oclc.oai.harvester2.verb.ListRecords(<%=url%>, resumptionToken_<%=cid%>);
+			document_<%=cid%> = listRecords_<%=cid%>.getDocument();
+			records_<%=cid%> = document_<%=cid%>.getElementsByTagName("record");
+			currentRecord_<%=cid%> = null;
+			if (records_<%=cid%>.getLength() > 0) {
+				currentRecord_<%=cid%> = records_<%=cid%>.item(0);
+				posInCurrentRecord_<%=cid%> = 0;
+			}
+		} else {
+			currentRecord_<%=cid%> = null; // Fin
+		}
+	}
+} // Fin de la boucle de données
+
+globalMap.put("<%=cid%>_NB_LINE", nb_line_<%=cid%>);

@@ -55,7 +55,30 @@ String set = ElementParameterParser.getValue(node, "__SET__");
 List<Map<String, String>> headerMapping = (List<Map<String,String>>)ElementParameterParser.getObjectValue(node, "__HEADER__");
 List<Map<String, String>> metadataMapping = (List<Map<String,String>>)ElementParameterParser.getObjectValue(node, "__METADATA__");
 String multiSeparator = ElementParameterParser.getValue(node, "__MULTI_SEPARATOR__");
+%>
 
+int nb_line_<%=cid%> = 0;
+
+org.oclc.oai.harvester2.verb.ListRecords listRecords_<%=cid%> = new org.oclc.oai.harvester2.verb.ListRecords(
+		<%=url%>,
+		<%=helper.talendTrimEmptyToNull(beginDate)%>,
+		<%=helper.talendTrimEmptyToNull(endDate)%>,
+		<%=helper.talendTrimEmptyToNull(set)%>,
+		<%=metadataPrefix%>
+);
+
+org.w3c.dom.Document document_<%=cid%> = listRecords_<%=cid%>.getDocument();
+org.w3c.dom.NodeList records_<%=cid%> = document_<%=cid%>.getElementsByTagName("record");
+org.w3c.dom.Node currentRecord_<%=cid%> = null;
+int posInCurrentRecord_<%=cid%> = 0;
+if (records_<%=cid%>.getLength() > 0) {
+	currentRecord_<%=cid%> = records_<%=cid%>.item(0);
+}
+
+while (currentRecord_<%=cid%> != null) { // Boucle de données
+	nb_line_<%=cid%>++;
+
+<%
 // Construction d'un StringBuilder par colonne de sortie.
 List<IMetadataTable> metadatas = node.getMetadataList();
 if ((metadatas!=null)&&(metadatas.size()>0)) {
@@ -64,38 +87,48 @@ if ((metadatas!=null)&&(metadatas.size()>0)) {
 		List<IMetadataColumn> columns = metadata.getListColumns();
 		for (IMetadataColumn column: columns) {
 %>
-StringBuilder <%=column.getLabel()%>_<%=cid%> = new StringBuilder();
+	StringBuilder <%=column.getLabel()%>_<%=cid%> = new StringBuilder();
 <%
 		}
 	}
 }
 %>
-
-java.util.Map<String, StringBuilder> headerMapping_<%=cid%> = new java.util.HashMap<String, StringBuilder> ();
+	java.util.Map<String, StringBuilder> headerMapping_<%=cid%> = new java.util.HashMap<String, StringBuilder> ();
 <%
 // Remplissage du "headerMatcher"
 for(Map<String,String> map: headerMapping) {
 %>
-headerMapping_<%=cid%>.put(<%=map.get("HEADER_FIELD")%>,<%=map.get("OUTPUT_COLUMN")%>_<%=cid%>);
+	headerMapping_<%=cid%>.put(<%=map.get("HEADER_FIELD")%>,<%=map.get("OUTPUT_COLUMN")%>_<%=cid%>);
 <%
 }
 %>
-java.util.Map<String, StringBuilder> metadataMapping_<%=cid%> = new java.util.HashMap<String, StringBuilder> ();
+	java.util.Map<String, StringBuilder> metadataMapping_<%=cid%> = new java.util.HashMap<String, StringBuilder> ();
 <%
 // Remplissage du "metadataMatcher"
 for(Map<String,String> map: metadataMapping) {
 %>
-metadataMapping_<%=cid%>.put(<%=map.get("METADATA_FIELD")%>,<%=map.get("OUTPUT_COLUMN")%>_<%=cid%>);
+	metadataMapping_<%=cid%>.put(<%=map.get("METADATA_FIELD")%>,<%=map.get("OUTPUT_COLUMN")%>_<%=cid%>);
 <%
 }
 %>
 
-org.oclc.oai.harvester2.verb.ListRecords records_<%=cid%> = new org.oclc.oai.harvester2.verb.ListRecords(
-		<%=url%>,
-		<%=helper.talendTrimEmptyToNull(beginDate)%>,
-		<%=helper.talendTrimEmptyToNull(endDate)%>,
-		<%=helper.talendTrimEmptyToNull(set)%>,
-		<%=metadataPrefix%>
-);
-
-org.w3c.dom.Document document_<%=cid%> = records_<%=cid%>.getDocument();
+<%
+if ((metadatas!=null) && (metadatas.size() > 0)) {
+	IMetadataTable metadata = metadatas.get(0);
+	if (metadata != null) {
+		List< ? extends IConnection> conns = node.getOutgoingSortedConnections();
+		if (conns != null && conns.size()>0){
+			IConnection conn =conns.get(0);
+			String connName = conn.getName();
+			if (conn.getLineStyle().hasConnectionCategory(IConnectionCategory.DATA)) {
+				List<IMetadataColumn> columns = metadata.getListColumns();
+				for (IMetadataColumn column: columns) {
+%>
+	<%=connName%>.<%=column.getLabel()%> = <%=column.getLabel()%>_<%=cid%>.toString();
+<%
+				}
+			}
+		}
+	}
+}
+%>
