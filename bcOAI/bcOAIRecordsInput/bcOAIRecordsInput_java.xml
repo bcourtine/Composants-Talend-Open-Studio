@@ -31,9 +31,16 @@
 
 	<PARAMETERS>
 		<PARAMETER NAME="SCHEMA" FIELD="SCHEMA_TYPE" REQUIRED="true" NUM_ROW="10">
-			<TABLE READONLY="false">
-				<COLUMN NAME="identifier" TYPE="id_String" LENGTH="255" READONLY="false" CUSTOM="true" />
-				<COLUMN NAME="datestamp" TYPE="id_String" LENGTH="255" READONLY="false" CUSTOM="true" />
+			<TABLE READONLY="true">
+				<!-- Record Header -->
+				<COLUMN NAME="identifier" TYPE="id_String" LENGTH="255" CUSTOM="true" />
+				<COLUMN NAME="datestamp" TYPE="id_String" LENGTH="20" CUSTOM="true" />
+				<COLUMN NAME="setSpec" TYPE="id_List" CUSTOM="true" />
+				<COLUMN NAME="status" TYPE="id_String" LENGTH="10" CUSTOM="true" />
+				<!-- Record Metadata -->
+				<COLUMN NAME="metadata" TYPE="id_Object" CUSTOM="true" />
+				<!-- Record About -->
+				<COLUMN NAME="about" TYPE="id_List" CUSTOM="true" />
 			</TABLE>
 		</PARAMETER>
 
@@ -54,27 +61,9 @@
 		<PARAMETER NAME="SET" FIELD="TEXT" REQUIRED="true" NUM_ROW="30">
 			<DEFAULT>""</DEFAULT>
 		</PARAMETER>
-
-		<!-- Mapping des champs de la réponse XML -->
-		<PARAMETER NAME="HEADER" FIELD="TABLE" NUM_ROW="40" NB_LINES="3">
-			<ITEMS>
-				<ITEM NAME="HEADER_FIELD" FIELD="TEXT" />
-				<ITEM NAME="OUTPUT_COLUMN" FIELD="COLUMN_LIST" />
-			</ITEMS>
-		</PARAMETER>
-
-		<PARAMETER NAME="METADATA" FIELD="TABLE" NUM_ROW="50" NB_LINES="5">
-			<ITEMS>
-				<ITEM NAME="METADATA_FIELD" FIELD="TEXT" />
-				<ITEM NAME="OUTPUT_COLUMN" FIELD="COLUMN_LIST" />
-			</ITEMS>
-		</PARAMETER>
 	</PARAMETERS>
 
 	<ADVANCED_PARAMETERS>
-		<PARAMETER NAME="MULTI_SEPARATOR" FIELD="TEXT" REQUIRED="true" NUM_ROW="10">
-			<DEFAULT>"XXX"</DEFAULT>
-		</PARAMETER>
 	</ADVANCED_PARAMETERS>
 
 	<CODEGENERATION>

@@ -52,9 +52,19 @@ String beginDate = ElementParameterParser.getValue(node, "__BEGIN_DATE__");
 String endDate = ElementParameterParser.getValue(node, "__END_DATE__");
 String metadataPrefix = ElementParameterParser.getValue(node, "__METADATA_PREFIX__");
 String set = ElementParameterParser.getValue(node, "__SET__");
-List<Map<String, String>> headerMapping = (List<Map<String,String>>)ElementParameterParser.getObjectValue(node, "__HEADER__");
-List<Map<String, String>> metadataMapping = (List<Map<String,String>>)ElementParameterParser.getObjectValue(node, "__METADATA__");
-String multiSeparator = ElementParameterParser.getValue(node, "__MULTI_SEPARATOR__");
+%>
+
+<%
+// Génération de code uniquement si on a une connexion de sortie
+List<IMetadataTable> metadatas = node.getMetadataList();
+if ((metadatas!=null) && (metadatas.size() > 0)) {
+	IMetadataTable metadata = metadatas.get(0);
+	if (metadata != null) {
+		List< ? extends IConnection> conns = node.getOutgoingSortedConnections();
+		if (conns != null && conns.size()>0){
+			IConnection conn =conns.get(0);
+			String connName = conn.getName();
+			if (conn.getLineStyle().hasConnectionCategory(IConnectionCategory.DATA)) {
 %>
 
 int nb_line_<%=cid%> = 0;
@@ -76,41 +86,15 @@ if (records_<%=cid%>.getLength() > 0) {
 }
 
 while (currentRecord_<%=cid%> != null) { // Boucle de données
-	nb_line_<%=cid%>++;
 
-<%
-// Construction d'un StringBuilder par colonne de sortie.
-List<IMetadataTable> metadatas = node.getMetadataList();
-if ((metadatas!=null)&&(metadatas.size()>0)) {
-	IMetadataTable metadata = metadatas.get(0);
-	if (metadata!=null) {
-		List<IMetadataColumn> columns = metadata.getListColumns();
-		for (IMetadataColumn column: columns) {
-%>
-	StringBuilder <%=column.getLabel()%>_<%=cid%> = new StringBuilder();
-<%
-		}
-	}
-}
-%>
-	java.util.Map<String, StringBuilder> headerMapping_<%=cid%> = new java.util.HashMap<String, StringBuilder> ();
-<%
-// Remplissage du "headerMatcher"
-for(Map<String,String> map: headerMapping) {
-%>
-	headerMapping_<%=cid%>.put(<%=map.get("HEADER_FIELD")%>,<%=map.get("OUTPUT_COLUMN")%>_<%=cid%>);
-<%
-}
-%>
-	java.util.Map<String, StringBuilder> metadataMapping_<%=cid%> = new java.util.HashMap<String, StringBuilder> ();
-<%
-// Remplissage du "metadataMatcher"
-for(Map<String,String> map: metadataMapping) {
-%>
-	metadataMapping_<%=cid%>.put(<%=map.get("METADATA_FIELD")%>,<%=map.get("OUTPUT_COLUMN")%>_<%=cid%>);
-<%
-}
-%>
+	<%=connName%>.identifier = "";
+	<%=connName%>.datestamp = "";
+	<%=connName%>.setSpec = new java.util.ArrayList<String>();
+	<%=connName%>.status = "";
+	<%=connName%>.metadata = null;
+	<%=connName%>.about = new java.util.ArrayList<org.w3c.dom.Node>();
+
+	nb_line_<%=cid%>++;
 
 	org.w3c.dom.NodeList currentRecordsChilds_<%=cid%> = currentRecord_<%=cid%>.getChildNodes();
 	for (int i=0;i < currentRecordsChilds_<%=cid%>.getLength(); i++) {
@@ -121,45 +105,32 @@ for(Map<String,String> map: metadataMapping) {
 			org.w3c.dom.NodeList headerNodes_<%=cid%> = currentChild_<%=cid%>.getChildNodes();
 			for (int j = 0; j < headerNodes_<%=cid%>.getLength(); j++) {
 				org.w3c.dom.Node headerNode_<%=cid%> = headerNodes_<%=cid%>.item(j);
-				if(headerMapping_<%=cid%>.containsKey(headerNode_<%=cid%>.getNodeName())) {
-					StringBuilder sb_<%=cid%> = headerMapping_<%=cid%>.get(headerNode_<%=cid%>.getNodeName());
-					if (sb_<%=cid%>.length() != 0) {
-						sb_<%=cid%>.append(<%=multiSeparator%>);
-					}
-					sb_<%=cid%>.append(headerNode_<%=cid%>.getChildNodes().item(0).getNodeValue());
+				if("identifier".equals(headerNode_<%=cid%>.getNodeName())) {
+					<%=connName%>.identifier = headerNode_<%=cid%>.getChildNodes().item(0).getNodeValue();
+				}
+				if("datestamp".equals(headerNode_<%=cid%>.getNodeName())) {
+					<%=connName%>.datestamp = headerNode_<%=cid%>.getChildNodes().item(0).getNodeValue();
+				}
+				if("setSpec".equals(headerNode_<%=cid%>.getNodeName())) {
+					<%=connName%>.setSpec.add(headerNode_<%=cid%>.getChildNodes().item(0).getNodeValue());
+				}
+				if("status".equals(headerNode_<%=cid%>.getNodeName())) {
+					<%=connName%>.status = headerNode_<%=cid%>.getChildNodes().item(0).getNodeValue();
 				}
 			}
 		}
 		// Metadata
 		if ("metadata".equals(currentChild_<%=cid%>.getNodeName())) {
-			org.w3c.dom.NodeList metadataNodes_<%=cid%> = currentChild_<%=cid%>.getChildNodes();
-			for (int j = 0; j < metadataNodes_<%=cid%>.getLength(); j++) {
-				org.w3c.dom.Node metadataNode_<%=cid%> = metadataNodes_<%=cid%>.item(j);
-				if(metadataMapping_<%=cid%>.containsKey(metadataNode_<%=cid%>.getNodeName())) {
-					StringBuilder sb_<%=cid%> = metadataMapping_<%=cid%>.get(metadataNode_<%=cid%>.getNodeName());
-					if (sb_<%=cid%>.length() != 0) {
-						sb_<%=cid%>.append(<%=multiSeparator%>);
-					}
-					sb_<%=cid%>.append(metadataNode_<%=cid%>.getChildNodes().item(0).getNodeValue());
-				}
-			}
+			<%=connName%>.metadata = currentChild_<%=cid%>;
 		}
+		// About
+		if ("about".equals(currentChild_<%=cid%>.getNodeName())) {
+			<%=connName%>.about.add(currentChild_<%=cid%>);
+		}
+
 	}
+
 <%
-if ((metadatas!=null) && (metadatas.size() > 0)) {
-	IMetadataTable metadata = metadatas.get(0);
-	if (metadata != null) {
-		List< ? extends IConnection> conns = node.getOutgoingSortedConnections();
-		if (conns != null && conns.size()>0){
-			IConnection conn =conns.get(0);
-			String connName = conn.getName();
-			if (conn.getLineStyle().hasConnectionCategory(IConnectionCategory.DATA)) {
-				List<IMetadataColumn> columns = metadata.getListColumns();
-				for (IMetadataColumn column: columns) {
-%>
-	<%=connName%>.<%=column.getLabel()%> = <%=column.getLabel()%>_<%=cid%>.toString();
-<%
-				}
 			}
 		}
 	}
