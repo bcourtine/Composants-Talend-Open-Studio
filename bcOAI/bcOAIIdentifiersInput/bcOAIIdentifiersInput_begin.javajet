@@ -1,0 +1,120 @@
+<%@ jet
+		imports="
+		org.talend.core.model.process.INode
+		org.talend.core.model.process.ElementParameterParser
+		org.talend.core.model.metadata.IMetadataTable
+		org.talend.core.model.metadata.IMetadataColumn
+		org.talend.core.model.process.IConnection
+		org.talend.core.model.process.IConnectionCategory
+		org.talend.designer.codegen.config.CodeGeneratorArgument
+		org.talend.core.model.metadata.types.JavaTypesManager
+		org.talend.core.model.metadata.types.JavaType
+		java.util.List
+    	java.util.Map
+	"
+%>
+
+<%
+/**
+ * Classe interne de méthodes utilitaires d'aide au développement.
+ */
+class OaiHelper {
+
+	/**
+	 * Renvoie la chaîne d'entrée si celle-ci est non-vide et différente de "\"\"", null sinon.
+	 *
+	 * @param input Chaîne à traiter.
+	 * @return null si la chaîne d'entrée est null, vide, ou si elle vaut "\"\"".
+	 *         chaîne d'entrée trimée si elle est non vide.
+	 */
+	public String talendTrimEmptyToNull(String input) {
+		if (input == null) {
+			return null;
+		}
+		String result = input.trim();
+		if ("".equals(result) || "\"\"".equals(result)) {
+			return null;
+		}
+		return result;
+	}
+}
+%>
+
+<%
+OaiHelper helper = new OaiHelper();
+CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
+INode node = (INode) codeGenArgument.getArgument();
+String cid = node.getUniqueName();
+
+// Extraction des paramètres
+String url = ElementParameterParser.getValue(node, "__URL__");
+String beginDate = ElementParameterParser.getValue(node, "__BEGIN_DATE__");
+String endDate = ElementParameterParser.getValue(node, "__END_DATE__");
+String metadataPrefix = ElementParameterParser.getValue(node, "__METADATA_PREFIX__");
+String set = ElementParameterParser.getValue(node, "__SET__");
+%>
+
+<%
+// Génération de code uniquement si on a une connexion de sortie
+List<IMetadataTable> metadatas = node.getMetadataList();
+if ((metadatas!=null) && (metadatas.size() > 0)) {
+	IMetadataTable metadata = metadatas.get(0);
+	if (metadata != null) {
+		List< ? extends IConnection> conns = node.getOutgoingSortedConnections();
+		if (conns != null && conns.size()>0){
+			IConnection conn =conns.get(0);
+			String connName = conn.getName();
+			if (conn.getLineStyle().hasConnectionCategory(IConnectionCategory.DATA)) {
+%>
+
+int nb_line_<%=cid%> = 0;
+
+org.oclc.oai.harvester2.verb.ListIdentifiers listIdentifiers_<%=cid%> = new org.oclc.oai.harvester2.verb.ListIdentifiers(
+		<%=url%>,
+		<%=helper.talendTrimEmptyToNull(beginDate)%>,
+		<%=helper.talendTrimEmptyToNull(endDate)%>,
+		<%=helper.talendTrimEmptyToNull(set)%>,
+		<%=metadataPrefix%>
+);
+
+org.w3c.dom.Document document_<%=cid%> = listIdentifiers_<%=cid%>.getDocument();
+org.w3c.dom.NodeList identifiers_<%=cid%> = document_<%=cid%>.getElementsByTagName("header");
+org.w3c.dom.Node currentIdentifier_<%=cid%> = null;
+int posInCurrentIdentifier_<%=cid%> = 0;
+if (identifiers_<%=cid%>.getLength() > 0) {
+	currentIdentifier_<%=cid%> = identifiers_<%=cid%>.item(0);
+}
+
+while (currentIdentifier_<%=cid%> != null) { // Boucle de données
+
+	<%=connName%>.identifier = "";
+	<%=connName%>.datestamp = "";
+	<%=connName%>.setSpec = new java.util.ArrayList<String>();
+	<%=connName%>.status = "";
+
+	nb_line_<%=cid%>++;
+
+	org.w3c.dom.NodeList currentIdentifiersChilds_<%=cid%> = currentIdentifier_<%=cid%>.getChildNodes();
+	for (int i=0;i < currentIdentifiersChilds_<%=cid%>.getLength(); i++) {
+		org.w3c.dom.Node currentChild_<%=cid%> = currentIdentifiersChilds_<%=cid%>.item(i);
+
+		if("identifier".equals(currentChild_<%=cid%>.getNodeName())) {
+			<%=connName%>.identifier = currentChild_<%=cid%>.getChildNodes().item(0).getNodeValue();
+		}
+		if("datestamp".equals(currentChild_<%=cid%>.getNodeName())) {
+			<%=connName%>.datestamp = currentChild_<%=cid%>.getChildNodes().item(0).getNodeValue();
+		}
+		if("setSpec".equals(currentChild_<%=cid%>.getNodeName())) {
+			<%=connName%>.setSpec.add(currentChild_<%=cid%>.getChildNodes().item(0).getNodeValue());
+		}
+		if("status".equals(currentChild_<%=cid%>.getNodeName())) {
+			<%=connName%>.status = currentChild_<%=cid%>.getChildNodes().item(0).getNodeValue();
+		}
+	}
+
+<%
+			}
+		}
+	}
+}
+%>
