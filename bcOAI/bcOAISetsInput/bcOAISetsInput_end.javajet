@@ -1,0 +1,64 @@
+<%@ jet
+		imports="
+		org.talend.core.model.process.INode
+		org.talend.core.model.process.ElementParameterParser
+		org.talend.core.model.metadata.IMetadataTable
+		org.talend.core.model.metadata.IMetadataColumn
+		org.talend.core.model.process.IConnection
+		org.talend.core.model.process.IConnectionCategory
+		org.talend.designer.codegen.config.CodeGeneratorArgument
+		org.talend.core.model.metadata.types.JavaTypesManager
+		org.talend.core.model.metadata.types.JavaType
+		java.util.List
+    	java.util.Map
+	"
+%>
+
+<%
+	CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
+	INode node = (INode) codeGenArgument.getArgument();
+	String cid = node.getUniqueName();
+	String url = ElementParameterParser.getValue(node, "__URL__");
+%>
+
+<%
+// Génération de code uniquement si on a une connexion de sortie
+List<IMetadataTable> metadatas = node.getMetadataList();
+if ((metadatas!=null) && (metadatas.size() > 0)) {
+	IMetadataTable metadata = metadatas.get(0);
+	if (metadata != null) {
+		List< ? extends IConnection> conns = node.getOutgoingSortedConnections();
+		if (conns != null && conns.size()>0){
+			IConnection conn =conns.get(0);
+			String connName = conn.getName();
+			if (conn.getLineStyle().hasConnectionCategory(IConnectionCategory.DATA)) {
+%>
+
+	// Enregistrement suivant
+	if (posInCurrentSets_<%=cid%> < sets_<%=cid%>.getLength() - 1) {
+		currentSet_<%=cid%> = sets_<%=cid%>.item(++posInCurrentSets_<%=cid%>);
+	} else {
+		String resumptionToken_<%=cid%> = listSets_<%=cid%>.getResumptionToken();
+		if (resumptionToken_<%=cid%> != null && resumptionToken_<%=cid%>.length() != 0) {
+			listSets_<%=cid%> = new org.oclc.oai.harvester2.verb.ListSets(<%=url%>, resumptionToken_<%=cid%>);
+			document_<%=cid%> = listSets_<%=cid%>.getDocument();
+			sets_<%=cid%> = document_<%=cid%>.getElementsByTagName("set");
+			currentSet_<%=cid%> = null;
+			if (sets_<%=cid%>.getLength() > 0) {
+				currentSet_<%=cid%> = sets_<%=cid%>.item(0);
+				posInCurrentSets_<%=cid%> = 0;
+			}
+		} else {
+			currentSet_<%=cid%> = null; // Fin
+		}
+	}
+} // Fin de la boucle de données
+
+globalMap.put("<%=cid%>_NB_LINE", nb_line_<%=cid%>);
+
+<%
+			}
+		}
+	}
+}
+%>

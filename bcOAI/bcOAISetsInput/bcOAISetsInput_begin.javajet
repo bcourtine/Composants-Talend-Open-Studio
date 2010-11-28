@@ -1,0 +1,82 @@
+<%@ jet
+		imports="
+		org.talend.core.model.process.INode
+		org.talend.core.model.process.ElementParameterParser
+		org.talend.core.model.metadata.IMetadataTable
+		org.talend.core.model.metadata.IMetadataColumn
+		org.talend.core.model.process.IConnection
+		org.talend.core.model.process.IConnectionCategory
+		org.talend.designer.codegen.config.CodeGeneratorArgument
+		org.talend.core.model.metadata.types.JavaTypesManager
+		org.talend.core.model.metadata.types.JavaType
+		java.util.List
+    	java.util.Map
+	"
+%>
+
+<%
+CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
+INode node = (INode) codeGenArgument.getArgument();
+String cid = node.getUniqueName();
+
+// Extraction des paramètres
+String url = ElementParameterParser.getValue(node, "__URL__");
+%>
+
+<%
+// Génération de code uniquement si on a une connexion de sortie
+List<IMetadataTable> metadatas = node.getMetadataList();
+if ((metadatas!=null) && (metadatas.size() > 0)) {
+	IMetadataTable metadata = metadatas.get(0);
+	if (metadata != null) {
+		List< ? extends IConnection> conns = node.getOutgoingSortedConnections();
+		if (conns != null && conns.size()>0){
+			IConnection conn =conns.get(0);
+			String connName = conn.getName();
+			if (conn.getLineStyle().hasConnectionCategory(IConnectionCategory.DATA)) {
+%>
+
+int nb_line_<%=cid%> = 0;
+
+org.oclc.oai.harvester2.verb.ListSets listSets_<%=cid%> = new org.oclc.oai.harvester2.verb.ListSets(<%=url%>);
+
+org.w3c.dom.Document document_<%=cid%> = listSets_<%=cid%>.getDocument();
+org.w3c.dom.NodeList sets_<%=cid%> = document_<%=cid%>.getElementsByTagName("set");
+org.w3c.dom.Node currentSet_<%=cid%> = null;
+int posInCurrentSets_<%=cid%> = 0;
+if (sets_<%=cid%>.getLength() > 0) {
+	currentSet_<%=cid%> = sets_<%=cid%>.item(0);
+}
+
+while (currentSet_<%=cid%> != null) { // Boucle de données
+
+	<%=connName%>.setSpec = "";
+	<%=connName%>.setName = "";
+	<%=connName%>.setDescription = new java.util.ArrayList<org.w3c.dom.Node>();
+
+	nb_line_<%=cid%>++;
+
+	org.w3c.dom.NodeList currentSetChilds_<%=cid%> = currentSet_<%=cid%>.getChildNodes();
+	for (int i=0;i < currentSetChilds_<%=cid%>.getLength(); i++) {
+		org.w3c.dom.Node currentChild_<%=cid%> = currentSetChilds_<%=cid%>.item(i);
+
+		// SetSpec
+		if ("setSpec".equals(currentChild_<%=cid%>.getNodeName())) {
+			<%=connName%>.setSpec = currentChild_<%=cid%>.getChildNodes().item(0).getNodeValue();
+		}
+		// SetName
+		if ("setName".equals(currentChild_<%=cid%>.getNodeName())) {
+			<%=connName%>.setName = currentChild_<%=cid%>.getChildNodes().item(0).getNodeValue();
+		}
+		// SetDescription
+		if ("setDescription".equals(currentChild_<%=cid%>.getNodeName())) {
+			<%=connName%>.setDescription.add(currentChild_<%=cid%>);
+		}
+	}
+
+<%
+			}
+		}
+	}
+}
+%>
