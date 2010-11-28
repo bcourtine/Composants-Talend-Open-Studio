@@ -1,0 +1,104 @@
+<%@ jet
+		imports="
+		org.talend.core.model.process.INode
+		org.talend.core.model.process.ElementParameterParser
+		org.talend.core.model.metadata.IMetadataTable
+		org.talend.core.model.metadata.IMetadataColumn
+		org.talend.core.model.process.IConnection
+		org.talend.core.model.process.IConnectionCategory
+		org.talend.designer.codegen.config.CodeGeneratorArgument
+		org.talend.core.model.metadata.types.JavaTypesManager
+		org.talend.core.model.metadata.types.JavaType
+		java.util.List
+    	java.util.Map
+	"
+%>
+
+<%
+CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
+INode node = (INode) codeGenArgument.getArgument();
+String cid = node.getUniqueName();
+
+// Extraction des paramètres
+String url = ElementParameterParser.getValue(node, "__URL__");
+String identifier = ElementParameterParser.getValue(node, "__IDENTIFIER__");
+String metadataPrefix = ElementParameterParser.getValue(node, "__METADATA_PREFIX__");
+%>
+
+<%
+// Génération de code uniquement si on a une connexion de sortie
+List<IMetadataTable> metadatas = node.getMetadataList();
+if ((metadatas!=null) && (metadatas.size() > 0)) {
+	IMetadataTable metadata = metadatas.get(0);
+	if (metadata != null) {
+		List< ? extends IConnection> conns = node.getOutgoingSortedConnections();
+		if (conns != null && conns.size()>0){
+			IConnection conn =conns.get(0);
+			String connName = conn.getName();
+			if (conn.getLineStyle().hasConnectionCategory(IConnectionCategory.DATA)) {
+%>
+
+int nb_line_<%=cid%> = 0;
+
+org.oclc.oai.harvester2.verb.GetRecord getRecord_<%=cid%> = new org.oclc.oai.harvester2.verb.GetRecord(
+		<%=url%>,
+		<%=identifier%>,
+		<%=metadataPrefix%>
+);
+
+org.w3c.dom.Document document_<%=cid%> = getRecord_<%=cid%>.getDocument();
+org.w3c.dom.NodeList records_<%=cid%> = document_<%=cid%>.getElementsByTagName("record");
+org.w3c.dom.Node currentRecord_<%=cid%> = null;
+int posInCurrentRecord_<%=cid%> = 0;
+if (records_<%=cid%>.getLength() > 0) { // Unique ligne de données.
+	currentRecord_<%=cid%> = records_<%=cid%>.item(0);
+
+	<%=connName%>.identifier = "";
+	<%=connName%>.datestamp = "";
+	<%=connName%>.setSpec = new java.util.ArrayList<String>();
+	<%=connName%>.status = "";
+	<%=connName%>.metadata = null;
+	<%=connName%>.about = new java.util.ArrayList<org.w3c.dom.Node>();
+
+	nb_line_<%=cid%>++;
+
+	org.w3c.dom.NodeList currentRecordsChilds_<%=cid%> = currentRecord_<%=cid%>.getChildNodes();
+	for (int i=0;i < currentRecordsChilds_<%=cid%>.getLength(); i++) {
+		org.w3c.dom.Node currentChild_<%=cid%> = currentRecordsChilds_<%=cid%>.item(i);
+
+		// Header
+		if ("header".equals(currentChild_<%=cid%>.getNodeName())) {
+			org.w3c.dom.NodeList headerNodes_<%=cid%> = currentChild_<%=cid%>.getChildNodes();
+			for (int j = 0; j < headerNodes_<%=cid%>.getLength(); j++) {
+				org.w3c.dom.Node headerNode_<%=cid%> = headerNodes_<%=cid%>.item(j);
+				if("identifier".equals(headerNode_<%=cid%>.getNodeName())) {
+					<%=connName%>.identifier = headerNode_<%=cid%>.getChildNodes().item(0).getNodeValue();
+				}
+				if("datestamp".equals(headerNode_<%=cid%>.getNodeName())) {
+					<%=connName%>.datestamp = headerNode_<%=cid%>.getChildNodes().item(0).getNodeValue();
+				}
+				if("setSpec".equals(headerNode_<%=cid%>.getNodeName())) {
+					<%=connName%>.setSpec.add(headerNode_<%=cid%>.getChildNodes().item(0).getNodeValue());
+				}
+				if("status".equals(headerNode_<%=cid%>.getNodeName())) {
+					<%=connName%>.status = headerNode_<%=cid%>.getChildNodes().item(0).getNodeValue();
+				}
+			}
+		}
+		// Metadata
+		if ("metadata".equals(currentChild_<%=cid%>.getNodeName())) {
+			<%=connName%>.metadata = currentChild_<%=cid%>;
+		}
+		// About
+		if ("about".equals(currentChild_<%=cid%>.getNodeName())) {
+			<%=connName%>.about.add(currentChild_<%=cid%>);
+		}
+
+	}
+
+<%
+			}
+		}
+	}
+}
+%>
