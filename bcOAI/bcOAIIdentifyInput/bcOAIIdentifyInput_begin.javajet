@@ -1,0 +1,105 @@
+<%@ jet
+		imports="
+		org.talend.core.model.process.INode
+		org.talend.core.model.process.ElementParameterParser
+		org.talend.core.model.metadata.IMetadataTable
+		org.talend.core.model.metadata.IMetadataColumn
+		org.talend.core.model.process.IConnection
+		org.talend.core.model.process.IConnectionCategory
+		org.talend.designer.codegen.config.CodeGeneratorArgument
+		org.talend.core.model.metadata.types.JavaTypesManager
+		org.talend.core.model.metadata.types.JavaType
+		java.util.List
+    	java.util.Map
+	"
+%>
+
+<%
+CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
+INode node = (INode) codeGenArgument.getArgument();
+String cid = node.getUniqueName();
+
+// Extraction des paramètres
+String url = ElementParameterParser.getValue(node, "__URL__");
+%>
+
+<%
+// Génération de code uniquement si on a une connexion de sortie
+List<IMetadataTable> metadatas = node.getMetadataList();
+if ((metadatas!=null) && (metadatas.size() > 0)) {
+	IMetadataTable metadata = metadatas.get(0);
+	if (metadata != null) {
+		List< ? extends IConnection> conns = node.getOutgoingSortedConnections();
+		if (conns != null && conns.size()>0){
+			IConnection conn =conns.get(0);
+			String connName = conn.getName();
+			if (conn.getLineStyle().hasConnectionCategory(IConnectionCategory.DATA)) {
+%>
+
+int nb_line_<%=cid%> = 0;
+
+org.oclc.oai.harvester2.verb.Identify getIdentification_<%=cid%> = new org.oclc.oai.harvester2.verb.Identify(
+		<%=url%>
+);
+
+org.w3c.dom.Node namespaceNode_<%=cid%> = org.oclc.oai.harvester2.verb.HarvesterVerb.getNameSpaceElement();
+org.w3c.dom.Document document_<%=cid%> = getIdentification_<%=cid%>.getDocument();
+org.w3c.dom.NodeList identify_<%=cid%> = org.apache.xpath.XPathAPI.selectNodeList(
+		document_<%=cid%>, "/oai20:OAI-PMH/oai20:Identify", namespaceNode_<%=cid%>
+);
+org.w3c.dom.Node currentRecord_<%=cid%> = null;
+int posInCurrentRecord_<%=cid%> = 0;
+if (identify_<%=cid%>.getLength() > 0) { // Unique ligne de données.
+	currentRecord_<%=cid%> = identify_<%=cid%>.item(0);
+
+	<%=connName%>.repositoryName = "";
+	<%=connName%>.baseURL = "";
+	<%=connName%>.protocolVersion = "";
+	<%=connName%>.adminEmail = new java.util.ArrayList<String>();
+	<%=connName%>.earliestDatestamp = "";
+	<%=connName%>.deletedRecord = "";
+	<%=connName%>.granularity = "";
+	<%=connName%>.compression = new java.util.ArrayList<String>();
+	<%=connName%>.description = new java.util.ArrayList<String>();
+
+	nb_line_<%=cid%>++;
+
+	org.w3c.dom.NodeList currentRecordsChilds_<%=cid%> = currentRecord_<%=cid%>.getChildNodes();
+	for (int i=0;i < currentRecordsChilds_<%=cid%>.getLength(); i++) {
+		org.w3c.dom.Node currentChild_<%=cid%> = currentRecordsChilds_<%=cid%>.item(i);
+
+		if ("repositoryName".equals(currentChild_<%=cid%>.getNodeName())) {
+			<%=connName%>.repositoryName = currentChild_<%=cid%>.getFirstChild().getNodeValue();
+		}
+		if ("baseURL".equals(currentChild_<%=cid%>.getNodeName())) {
+			<%=connName%>.baseURL = currentChild_<%=cid%>.getFirstChild().getNodeValue();
+		}
+		if ("protocolVersion".equals(currentChild_<%=cid%>.getNodeName())) {
+			<%=connName%>.protocolVersion = currentChild_<%=cid%>.getFirstChild().getNodeValue();
+		}
+		if ("adminEmail".equals(currentChild_<%=cid%>.getNodeName())) {
+			<%=connName%>.adminEmail.add(currentChild_<%=cid%>.getFirstChild().getNodeValue());
+		}
+		if ("earliestDatestamp".equals(currentChild_<%=cid%>.getNodeName())) {
+			<%=connName%>.earliestDatestamp = currentChild_<%=cid%>.getFirstChild().getNodeValue();
+		}
+		if ("deletedRecord".equals(currentChild_<%=cid%>.getNodeName())) {
+			<%=connName%>.deletedRecord = currentChild_<%=cid%>.getFirstChild().getNodeValue();
+		}
+		if ("granularity".equals(currentChild_<%=cid%>.getNodeName())) {
+			<%=connName%>.granularity = currentChild_<%=cid%>.getFirstChild().getNodeValue();
+		}
+		if ("compression".equals(currentChild_<%=cid%>.getNodeName())) {
+			<%=connName%>.compression.add(currentChild_<%=cid%>.getFirstChild().getNodeValue());
+		}
+		if ("description".equals(currentChild_<%=cid%>.getNodeName())) {
+			<%=connName%>.description.add(currentChild_<%=cid%>.getFirstChild().getNodeValue());
+		}
+	}
+
+<%
+			}
+		}
+	}
+}
+%>

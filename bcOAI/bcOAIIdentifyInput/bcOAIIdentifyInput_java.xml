@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<COMPONENT>
+	<HEADER
+			AUTHOR="Benoit Courtine"
+			COMPATIBILITY="ALL"
+			PLATEFORM="ALL"
+			RELEASE_DATE="20101130A"
+			SERIAL=""
+			STARTABLE="true"
+			STATUS="ALPHA"
+			VERSION="0.1"
+	>
+		<SIGNATURE/>
+	</HEADER>
+	<FAMILIES>
+		<FAMILY>Internet/OAI</FAMILY>
+	</FAMILIES>
+	<DOCUMENTATION>
+		<URL/>
+	</DOCUMENTATION>
+	<CONNECTORS>
+		<CONNECTOR CTYPE="FLOW" MAX_INPUT="0" MAX_OUTPUT="1"/>
+		<CONNECTOR CTYPE="ITERATE" MAX_OUTPUT="0" MAX_INPUT="1"/>
+		<CONNECTOR CTYPE="SUBJOB_OK" MAX_INPUT="1" />
+		<CONNECTOR CTYPE="SUBJOB_ERROR" MAX_INPUT="1" />
+		<CONNECTOR CTYPE="COMPONENT_OK"/>
+		<CONNECTOR CTYPE="COMPONENT_ERROR"/>
+		<CONNECTOR CTYPE="RUN_IF"/>
+	</CONNECTORS>
+
+	<PARAMETERS>
+		<PARAMETER NAME="SCHEMA" FIELD="SCHEMA_TYPE" REQUIRED="true" NUM_ROW="10">
+			<TABLE READONLY="true">
+				<COLUMN NAME="repositoryName" TYPE="id_String" LENGTH="255" CUSTOM="true" />
+				<COLUMN NAME="baseURL" TYPE="id_String" LENGTH="255" CUSTOM="true" />
+				<COLUMN NAME="protocolVersion" TYPE="id_String" LENGTH="10" CUSTOM="true" />
+				<COLUMN NAME="adminEmail" TYPE="id_List" CUSTOM="true" />
+				<COLUMN NAME="earliestDatestamp" TYPE="id_String" LENGTH="20" CUSTOM="true" />
+				<COLUMN NAME="deletedRecord" TYPE="id_String" LENGTH="20" CUSTOM="true" />
+				<COLUMN NAME="granularity" TYPE="id_String" LENGTH="25" CUSTOM="true" />
+				<COLUMN NAME="compression" TYPE="id_List" CUSTOM="true" />
+				<COLUMN NAME="description" TYPE="id_List" CUSTOM="true" />
+			</TABLE>
+		</PARAMETER>
+
+		<PARAMETER NAME="URL" FIELD="TEXT" REQUIRED="true" NUM_ROW="20">
+			<DEFAULT>"http://alcme.oclc.org/oaicat/OAIHandler"</DEFAULT>
+		</PARAMETER>
+	</PARAMETERS>
+
+	<ADVANCED_PARAMETERS>
+	</ADVANCED_PARAMETERS>
+
+	<CODEGENERATION>
+		<IMPORTS>
+			<IMPORT NAME="OAIHarvester2-0.2.1" MODULE="oaiharvester2-0.2.1.jar" REQUIRED="true" />
+			<IMPORT NAME="XercesImpl-2.9.1" MODULE="xercesImpl-2.9.1.jar" REQUIRED="true" />
+			<IMPORT NAME="Xalan-2.7.1" MODULE="xalan-2.7.1.jar" REQUIRED="true" />
+			<IMPORT NAME="Serializer-2.7.1" MODULE="serializer-2.7.1.jar" REQUIRED="true" />
+			<IMPORT NAME="XML-Apis-1.3.04" MODULE="xml-apis-1.3.04.jar" REQUIRED="true" />
+		</IMPORTS>
+	</CODEGENERATION>
+
+	<RETURNS>
+		<RETURN AVAILABILITY="AFTER" NAME="NB_LINE" TYPE="id_Integer"/>
+	</RETURNS>
+</COMPONENT>
