@@ -46,8 +46,11 @@ org.oclc.oai.harvester2.verb.GetRecord getRecord_<%=cid%> = new org.oclc.oai.har
 		<%=metadataPrefix%>
 );
 
+org.w3c.dom.Node namespaceNode_<%=cid%> = org.oclc.oai.harvester2.verb.HarvesterVerb.getNameSpaceElement();
 org.w3c.dom.Document document_<%=cid%> = getRecord_<%=cid%>.getDocument();
-org.w3c.dom.NodeList records_<%=cid%> = document_<%=cid%>.getElementsByTagName("record");
+org.w3c.dom.NodeList records_<%=cid%> = org.apache.xpath.XPathAPI.selectNodeList(
+		document_<%=cid%>, "/oai20:OAI-PMH/oai20:GetRecord/oai20:record", namespaceNode_<%=cid%>
+);
 org.w3c.dom.Node currentRecord_<%=cid%> = null;
 int posInCurrentRecord_<%=cid%> = 0;
 if (records_<%=cid%>.getLength() > 0) { // Unique ligne de données.

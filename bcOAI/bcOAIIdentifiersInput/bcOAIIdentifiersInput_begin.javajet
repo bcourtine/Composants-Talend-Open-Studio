@@ -77,8 +77,11 @@ org.oclc.oai.harvester2.verb.ListIdentifiers listIdentifiers_<%=cid%> = new org.
 		<%=metadataPrefix%>
 );
 
+org.w3c.dom.Node namespaceNode_<%=cid%> = org.oclc.oai.harvester2.verb.HarvesterVerb.getNameSpaceElement();
 org.w3c.dom.Document document_<%=cid%> = listIdentifiers_<%=cid%>.getDocument();
-org.w3c.dom.NodeList identifiers_<%=cid%> = document_<%=cid%>.getElementsByTagName("header");
+org.w3c.dom.NodeList identifiers_<%=cid%> = org.apache.xpath.XPathAPI.selectNodeList(
+		document_<%=cid%>, "/oai20:OAI-PMH/oai20:ListIdentifiers/oai20:header", namespaceNode_<%=cid%>
+);
 org.w3c.dom.Node currentIdentifier_<%=cid%> = null;
 int posInCurrentIdentifier_<%=cid%> = 0;
 if (identifiers_<%=cid%>.getLength() > 0) {

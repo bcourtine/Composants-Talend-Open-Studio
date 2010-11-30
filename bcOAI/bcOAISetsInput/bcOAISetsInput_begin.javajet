@@ -40,8 +40,11 @@ int nb_line_<%=cid%> = 0;
 
 org.oclc.oai.harvester2.verb.ListSets listSets_<%=cid%> = new org.oclc.oai.harvester2.verb.ListSets(<%=url%>);
 
+org.w3c.dom.Node namespaceNode_<%=cid%> = org.oclc.oai.harvester2.verb.HarvesterVerb.getNameSpaceElement();
 org.w3c.dom.Document document_<%=cid%> = listSets_<%=cid%>.getDocument();
-org.w3c.dom.NodeList sets_<%=cid%> = document_<%=cid%>.getElementsByTagName("set");
+org.w3c.dom.NodeList sets_<%=cid%> = org.apache.xpath.XPathAPI.selectNodeList(
+		document_<%=cid%>, "/oai20:OAI-PMH/oai20:ListSets/oai20:set", namespaceNode_<%=cid%>
+);
 org.w3c.dom.Node currentSet_<%=cid%> = null;
 int posInCurrentSets_<%=cid%> = 0;
 if (sets_<%=cid%>.getLength() > 0) {

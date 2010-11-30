@@ -42,7 +42,9 @@ if ((metadatas!=null) && (metadatas.size() > 0)) {
 		if (resumptionToken_<%=cid%> != null && resumptionToken_<%=cid%>.length() != 0) {
 			listRecords_<%=cid%> = new org.oclc.oai.harvester2.verb.ListRecords(<%=url%>, resumptionToken_<%=cid%>);
 			document_<%=cid%> = listRecords_<%=cid%>.getDocument();
-			records_<%=cid%> = document_<%=cid%>.getElementsByTagName("record");
+			records_<%=cid%> = org.apache.xpath.XPathAPI.selectNodeList(
+					document_<%=cid%>, "/oai20:OAI-PMH/oai20:ListRecords/oai20:record", namespaceNode_<%=cid%>
+			);
 			currentRecord_<%=cid%> = null;
 			if (records_<%=cid%>.getLength() > 0) {
 				currentRecord_<%=cid%> = records_<%=cid%>.item(0);

@@ -40,8 +40,11 @@ int nb_line_<%=cid%> = 0;
 
 org.oclc.oai.harvester2.verb.ListMetadataFormats listMetadatas_<%=cid%> = new org.oclc.oai.harvester2.verb.ListMetadataFormats(<%=url%>);
 
+org.w3c.dom.Node namespaceNode_<%=cid%> = org.oclc.oai.harvester2.verb.HarvesterVerb.getNameSpaceElement();
 org.w3c.dom.Document document_<%=cid%> = listMetadatas_<%=cid%>.getDocument();
-org.w3c.dom.NodeList metadatas_<%=cid%> = document_<%=cid%>.getElementsByTagName("metadataFormat");
+org.w3c.dom.NodeList metadatas_<%=cid%> = org.apache.xpath.XPathAPI.selectNodeList(
+		document_<%=cid%>, "/oai20:OAI-PMH/oai20:ListMetadataFormats/oai20:metadataFormat", namespaceNode_<%=cid%>
+);
 org.w3c.dom.Node currentMetadata_<%=cid%> = null;
 
 for (int pos_<%=cid%> = 0; pos_<%=cid%> < metadatas_<%=cid%>.getLength(); pos_<%=cid%>++) { // Boucle de données

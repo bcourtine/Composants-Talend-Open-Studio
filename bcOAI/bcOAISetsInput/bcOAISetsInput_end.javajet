@@ -42,7 +42,9 @@ if ((metadatas!=null) && (metadatas.size() > 0)) {
 		if (resumptionToken_<%=cid%> != null && resumptionToken_<%=cid%>.length() != 0) {
 			listSets_<%=cid%> = new org.oclc.oai.harvester2.verb.ListSets(<%=url%>, resumptionToken_<%=cid%>);
 			document_<%=cid%> = listSets_<%=cid%>.getDocument();
-			sets_<%=cid%> = document_<%=cid%>.getElementsByTagName("set");
+			sets_<%=cid%> = org.apache.xpath.XPathAPI.selectNodeList(
+					document_<%=cid%>, "/oai20:OAI-PMH/oai20:ListSets/oai20:set", namespaceNode_<%=cid%>
+			);
 			currentSet_<%=cid%> = null;
 			if (sets_<%=cid%>.getLength() > 0) {
 				currentSet_<%=cid%> = sets_<%=cid%>.item(0);
