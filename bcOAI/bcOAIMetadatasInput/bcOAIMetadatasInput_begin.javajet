@@ -62,13 +62,13 @@ for (int pos_<%=cid%> = 0; pos_<%=cid%> < metadatas_<%=cid%>.getLength(); pos_<%
 		org.w3c.dom.Node currentChild_<%=cid%> = currentSetChilds_<%=cid%>.item(i);
 
 		if ("metadataPrefix".equals(currentChild_<%=cid%>.getNodeName())) {
-			<%=connName%>.metadataPrefix = currentChild_<%=cid%>.getChildNodes().item(0).getNodeValue();
+			<%=connName%>.metadataPrefix = currentChild_<%=cid%>.getFirstChild().getNodeValue();
 		}
 		if ("schema".equals(currentChild_<%=cid%>.getNodeName())) {
-			<%=connName%>.metadataSchema = currentChild_<%=cid%>.getChildNodes().item(0).getNodeValue();
+			<%=connName%>.metadataSchema = currentChild_<%=cid%>.getFirstChild().getNodeValue();
 		}
 		if ("metadataNamespace".equals(currentChild_<%=cid%>.getNodeName())) {
-			<%=connName%>.metadataNamespace = currentChild_<%=cid%>.getChildNodes().item(0).getNodeValue();
+			<%=connName%>.metadataNamespace = currentChild_<%=cid%>.getFirstChild().getNodeValue();
 		}
 	}
 

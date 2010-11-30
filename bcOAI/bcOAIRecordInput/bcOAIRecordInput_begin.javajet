@@ -75,16 +75,16 @@ if (records_<%=cid%>.getLength() > 0) { // Unique ligne de données.
 			for (int j = 0; j < headerNodes_<%=cid%>.getLength(); j++) {
 				org.w3c.dom.Node headerNode_<%=cid%> = headerNodes_<%=cid%>.item(j);
 				if("identifier".equals(headerNode_<%=cid%>.getNodeName())) {
-					<%=connName%>.identifier = headerNode_<%=cid%>.getChildNodes().item(0).getNodeValue();
+					<%=connName%>.identifier = headerNode_<%=cid%>.getFirstChild().getNodeValue();
 				}
 				if("datestamp".equals(headerNode_<%=cid%>.getNodeName())) {
-					<%=connName%>.datestamp = headerNode_<%=cid%>.getChildNodes().item(0).getNodeValue();
+					<%=connName%>.datestamp = headerNode_<%=cid%>.getFirstChild().getNodeValue();
 				}
 				if("setSpec".equals(headerNode_<%=cid%>.getNodeName())) {
-					<%=connName%>.setSpec.add(headerNode_<%=cid%>.getChildNodes().item(0).getNodeValue());
+					<%=connName%>.setSpec.add(headerNode_<%=cid%>.getFirstChild().getNodeValue());
 				}
 				if("status".equals(headerNode_<%=cid%>.getNodeName())) {
-					<%=connName%>.status = headerNode_<%=cid%>.getChildNodes().item(0).getNodeValue();
+					<%=connName%>.status = headerNode_<%=cid%>.getFirstChild().getNodeValue();
 				}
 			}
 		}

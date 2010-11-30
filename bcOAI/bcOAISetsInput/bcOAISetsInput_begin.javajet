@@ -65,11 +65,11 @@ while (currentSet_<%=cid%> != null) { // Boucle de données
 
 		// SetSpec
 		if ("setSpec".equals(currentChild_<%=cid%>.getNodeName())) {
-			<%=connName%>.setSpec = currentChild_<%=cid%>.getChildNodes().item(0).getNodeValue();
+			<%=connName%>.setSpec = currentChild_<%=cid%>.getFirstChild().getNodeValue();
 		}
 		// SetName
 		if ("setName".equals(currentChild_<%=cid%>.getNodeName())) {
-			<%=connName%>.setName = currentChild_<%=cid%>.getChildNodes().item(0).getNodeValue();
+			<%=connName%>.setName = currentChild_<%=cid%>.getFirstChild().getNodeValue();
 		}
 		// SetDescription
 		if ("setDescription".equals(currentChild_<%=cid%>.getNodeName())) {

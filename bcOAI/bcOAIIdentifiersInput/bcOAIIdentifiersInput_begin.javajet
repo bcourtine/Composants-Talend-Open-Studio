@@ -102,16 +102,16 @@ while (currentIdentifier_<%=cid%> != null) { // Boucle de données
 		org.w3c.dom.Node currentChild_<%=cid%> = currentIdentifiersChilds_<%=cid%>.item(i);
 
 		if("identifier".equals(currentChild_<%=cid%>.getNodeName())) {
-			<%=connName%>.identifier = currentChild_<%=cid%>.getChildNodes().item(0).getNodeValue();
+			<%=connName%>.identifier = currentChild_<%=cid%>.getFirstChild().getNodeValue();
 		}
 		if("datestamp".equals(currentChild_<%=cid%>.getNodeName())) {
-			<%=connName%>.datestamp = currentChild_<%=cid%>.getChildNodes().item(0).getNodeValue();
+			<%=connName%>.datestamp = currentChild_<%=cid%>.getFirstChild().getNodeValue();
 		}
 		if("setSpec".equals(currentChild_<%=cid%>.getNodeName())) {
-			<%=connName%>.setSpec.add(currentChild_<%=cid%>.getChildNodes().item(0).getNodeValue());
+			<%=connName%>.setSpec.add(currentChild_<%=cid%>.getFirstChild().getNodeValue());
 		}
 		if("status".equals(currentChild_<%=cid%>.getNodeName())) {
-			<%=connName%>.status = currentChild_<%=cid%>.getChildNodes().item(0).getNodeValue();
+			<%=connName%>.status = currentChild_<%=cid%>.getFirstChild().getNodeValue();
 		}
 	}
 
