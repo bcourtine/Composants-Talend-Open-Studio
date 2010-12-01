@@ -4,23 +4,53 @@ Ces composants et routines sont destinés à fournir de nouveaux connecteurs ou 
 
 h2. Les composants et routines
 
+h3. Routines
+
+Ce répertoire contient des routines utilitaires :
+
 * @StaticMap@ : Map de données statique, permettant le partage de données entre un job et ses sous-jobs, ou entre un job et une application java appelante.
 * @StaticThreadLocalMap@ : Map de données statique, mais instanciée par Thread. Elle permet à plusieurs instance d'un même job tournant dans différents Thread d'une même JVM d'utiliser cette Map sans collision.
-* @bcAggregateRow@ : extension du composant @tAggregateRow@ offrant des fonctions d'agrégation sur des données booléennes (et logique, ou logique, ou exclusif).
+
+h3. Files
+
+Composants de lecture/écriture/manipulation de fichiers :
+
 * @bcFileListExt@ : extension du composant @tFileList@, permettant d'avoir plusieurs patterns d'exclusion au lieu d'un seul.
 * @bcFileOutputOOSpreadsheet@ : composant permettant d'écrire les données dans un fichier au format Open Document SpreadSheet (ODS).
+* @tFileDigester@ : calcul de la clé de hachage d'un fichier, selon plusieurs algorithmes (SHA, MD5, etc.)
+* @bcFileOutputSQL@ : ce composant a pour but de créer un fichier script d'ordres SQL à partir des données entrantes. Le développement de ce composant peut être suivi dans la branche "bcFileOutputSQL":http://github.com/bcourtine/Composants-Talend-Open-Studio/tree/bcFileOutputSQL
+
+h3. Utils
+
+Composants utilitaires :
+
+* @bcAggregateRow@ : extension du composant @tAggregateRow@ offrant des fonctions d'agrégation sur des données booléennes (et logique, ou logique, ou exclusif).
+* @tBufferCopyInput@ : extension du composant @tBufferInput@ permettant la lecture des données à partir d'une copie du buffer, effectuée à l'initialisation du composant.
+* @tBufferOutput@ : extension du composant @tBufferOutput@ permettant d'effacer le buffer avant de l'utiliser. Cela permet d'enchaîner plusieurs utilisations du buffer dans un même job.
+* @tRunJobRow@ : extention du composant "tRunJob" permettant d'avoir des flux de données en entrée et en sortie du sous-job.
+* @bcResourceInputProperties@ : lecture d'un fichier "properties" depuis le classpath du programme. Ce composant permet (entre autres) de lire des fichiers non décompressés à l'intérieur d'archives JAR.
+
+h3. Logging
+
+Composants dédiés au logging ("Log4J":http://logging.apache.org/log4j/ et "Logback":http://logback.qos.ch/). Les dernières versions de ces composants sont développées dans la branche de développement dédiée "Logging":http://github.com/bcourtine/Composants-Talend-Open-Studio/tree/Logging :
+
 * @bcLogback@ : utilisation du framework de logging Logback au travers de slf4J.
 * @bcLogbackCatch@ : interception des logs natives du job, et redirection vers le framework Logback (au travers de slf4J)
 * @bcLogbackConfig@ : configuration du framework de logging Logback.
-* @bcResourceInputProperties@ : lecture d'un fichier "properties" depuis le classpath du programme. Ce composant permet (entre autres) de lire des fichiers non décompressés à l'intérieur d'archives JAR.
-* @tBufferCopyInput@ : extension du composant @tBufferInput@ permettant la lecture des données à partir d'une copie du buffer, effectuée à l'initialisation du composant.
-* @tBufferOutput@ : extension du composant @tBufferOutput@ permettant d'effacer le buffer avant de l'utiliser. Cela permet d'enchaîner plusieurs utilisations du buffer dans un même job.
-* @tFileDigester@ : calcul de la clé de hachage d'un fichier, selon plusieurs algorithmes (SHA, MD5, etc.)
 * @tInitLog4J@ : configuration du framework de logging Log4J.
 * @tLog4J@ : écriture de logs utilisant le framework Log4J.
 * @tLog4JCatch@ : interception des logs natives du job et redirection vers le framework Log4J.
-* @tRunJobRow@ : extention du composant "tRunJob" permettant d'avoir des flux de données en entrée et en sortie du sous-job.
-* @bcFileOutputSQL@ : ce composant a pour but de créer un fichier script d'ordres SQL à partir des données entrantes. Le développement de ce composant peut être suivi dans la branche "bcFileOutputSQL":http://github.com/bcourtine/Composants-Talend-Open-Studio/tree/bcFileOutputSQL
+
+h3. OAI
+
+La série de composants @bcOAI...@ permet d'avoir des composants pour lire des données en utilisant le protocole "OAI-PMH":http://www.openarchives.org/OAI/openarchivesprotocol.html. Les dernières versions de ces composants sont dans la branche de développement dédiée "bcOAI":http://github.com/bcourtine/Composants-Talend-Open-Studio/tree/bcOAI :
+
+* @bcOAIIdentifyInput@ : lecture de l'identification du serveur OAI-PMH.
+* @bcOAIIdentifiersInput@ : lecture des identifiants des objets "moissonnables".
+* @bcOAIMetadatasInput@ : lecture des formats de métadonnées supportés par le serveur.
+* @bcOAIRecordInput@ : lecture d'un enregistrement particulier à partir de son identifiant.
+* @bcOAIRecordsInput@ : moissonnage des objets connus du serveur.
+* @bcOAISetsInput@ : lecture des "ensembles" (sets) disponibles sur le serveur.
 
 h2. Installation des composants
 
@@ -40,4 +70,4 @@ h2. Nouveaux composants et évolutions prévus
 
 * Le composant @bcFileOutputOOSpreadsheet@ doit être complété, en particulier pour traiter correctement les données de type "Date".
 * Une série de composants @bcDataSource...@ est prévue pour lire/écrire des données fournies par une DataSource (d'un serveur d'applications). Le développement de ces composants peut être suivi dans la branche "datasource":http://github.com/bcourtine/Composants-Talend-Open-Studio/tree/datasource
-* Une série de composants @bcOAI...@ est prévue pour lire des données par moissonnage d'une source à partir du protocole OAI-PMH. Le développement de ces composants peut être suivi dans la branche "bcOAI":http://github.com/bcourtine/Composants-Talend-Open-Studio/tree/bcOAI
+* Un composant @bcFileInputXML@ (évolution de @tFileInputXML@) est prévu pour permettre la lecture de fichiers XML ayant des noeuds de cardinalité > 1 dans la boucle de données. Le développement de ce composant peut être suivi dans la branche "XML":http://github.com/bcourtine/Composants-Talend-Open-Studio/tree/XML.
