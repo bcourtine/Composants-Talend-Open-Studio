@@ -327,7 +327,9 @@ org.w3c.dom.Document doc_<%=cid%> = parser_<%=cid%>.getDocument();
 xml_api_<%=cid%>.initXPath(doc_<%=cid%>);
 org.w3c.dom.NodeList nodelist_<%=cid %> = xml_api_<%=cid%>.getNodeList(doc_<%=cid %>,<%=loopQuery%>);
 
+org.w3c.dom.NodeList nl_<%=cid%> = null;
 org.w3c.dom.Node node_<%=cid%>  = null;
+java.util.List<String> lst_<%=cid%> = null;
 String str_<%=cid%> = null;
 for (int i_<%=cid %> = 0; i_<%=cid %> < nodelist_<%=cid %>.getLength(); i_<%=cid %>++) {
 	org.w3c.dom.Node tmp_<%=cid %> = nodelist_<%=cid %>.item(i_<%=cid %>);
@@ -700,11 +702,21 @@ if ((metadatas!=null)&&(metadatas.size()>0)) {
 				for (int i=0;i<mapping.size();i++) { // S_for_a_1_0
 					String query = mapping.get(i).get("QUERY");
 					String nodeCheck = mapping.get(i).get("NODECHECK");
+					String multiNodeCheck = mapping.get(i).get("MULTINODECHECK");
 					if(("Xerces").equals(mode)){
 %>
+	lst_<%=cid%> = new java.util.ArrayList<String>();
 	if(xml_api_<%=cid%>.getNodeType(tmp_<%=cid %>,<%=query%>)==com.sun.org.apache.xpath.internal.objects.XObject.CLASS_NODESET){
 		node_<%=cid%> = xml_api_<%=cid%>.getSingleNode(tmp_<%=cid %>,<%=query%>);
 <%
+						if(("true").equals(multiNodeCheck)) {
+%>
+		nl_<%=cid%> = xml_api_<%=cid%>.getNodeList(tmp_<%=cid %>,<%=query%>);
+		for (int i = 0; i < nl_<%=cid%>.getLength(); i++) {
+			lst_<%=cid%>.add(nl_<%=cid%>.item(i).getTextContent());
+		}
+<%
+						}
 						if("true".equals(useSeparator)){
 %>
     	if(node_<%=cid %>!=null && node_<%=cid %>.getNodeType()==org.w3c.dom.Node.ELEMENT_NODE && node_<%=cid %>.hasChildNodes()){
@@ -739,7 +751,6 @@ if ((metadatas!=null)&&(metadatas.size()>0)) {
 %>
 		str_<%=cid %> = node_<%=cid %>==null?null:node_<%=cid %>.asXML();
 <%
-							
 						}else{
 %>
     	str_<%=cid %> = xTmp<%=i%>_<%=cid%>.valueOf(temp_<%=cid%>);
@@ -764,7 +775,7 @@ if ((metadatas!=null)&&(metadatas.size()>0)) {
 					}
 					for(IMetadataColumn column:columns) {  // S_for_0_1
 						if (mapping.get(i).get("SCHEMA_COLUMN")!=null) { // S_if_0_2
-							if (column.getLabel().compareTo(mapping.get(i).get("SCHEMA_COLUMN"))==0) { // S_if_0_3
+							if (column.getLabel().equals(mapping.get(i).get("SCHEMA_COLUMN"))) { // S_if_0_3
 								String typeToGenerate = JavaTypesManager.getTypeToGenerate(column.getTalendType(), column.isNullable());
 								JavaType javaType = JavaTypesManager.getJavaTypeFromId(column.getTalendType());
 								String patternValue = column.getPattern() == null || column.getPattern().trim().length() == 0 ? null : column.getPattern();
@@ -782,6 +793,14 @@ if ((metadatas!=null)&&(metadatas.size()>0)) {
 								<%=conn.getName() %>.<%=column.getLabel() %> = str_<%=cid %>;
 <%
 									continue;
+								}
+								if(("Xerces").equals(mode) && ("true").equals(multiNodeCheck)) {
+									if(javaType == JavaTypesManager.LIST) {
+%>
+								<%=conn.getName() %>.<%=column.getLabel() %> = lst_<%=cid %>;
+<%
+										continue;
+									}
 								}
 								if(javaType == JavaTypesManager.STRING){
 									if(column.isNullable()){
@@ -820,7 +839,6 @@ if ((metadatas!=null)&&(metadatas.size()>0)) {
 <%
 									}
 								}
-								
 								if (javaType == JavaTypesManager.STRING || javaType == JavaTypesManager.OBJECT) {
 %>
 		<%=conn.getName() %>.<%=column.getLabel() %> = str_<%=cid %>;
