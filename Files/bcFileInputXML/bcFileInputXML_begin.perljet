@@ -1,0 +1,114 @@
+<%@ jet 
+imports="
+    org.talend.core.model.process.INode 
+    org.talend.core.model.process.ElementParameterParser 
+    org.talend.core.model.metadata.IMetadataTable 
+    org.talend.core.model.metadata.IMetadataColumn 
+    org.talend.designer.codegen.config.CodeGeneratorArgument
+    java.util.Map
+    java.util.List
+" 
+%>
+
+<%
+CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
+INode node = (INode)codeGenArgument.getArgument();
+String cid = node.getUniqueName();
+
+List<IMetadataTable> metadatas = node.getMetadataList();
+if ((metadatas!=null)&&(metadatas.size()>0)) {
+    IMetadataTable metadata = metadatas.get(0);
+    if (metadata!=null) {
+
+        List<Map<String, String>> mapping =
+            (List<Map<String,String>>)ElementParameterParser.getObjectValueXML(
+                node,
+                "__MAPPING__"
+            );
+
+        String loopQuery = ElementParameterParser.getValue(
+            node,
+            "__LOOP_QUERY__"
+        );
+
+        String filename = ElementParameterParser.getValue(
+            node,
+            "__FILENAME__"
+        );
+
+        String limit = ElementParameterParser.getValue(
+            node,
+            "__LIMIT__"
+        );
+
+        if (limit.equals("") || limit.startsWith("-")) {
+            limit = "undef";
+        }
+%>
+
+my %desc_<%=cid %> = (
+    filename      => <%=filename%>,
+    loop_query    => <%=loopQuery%>,
+    limit         => <%=limit%>,
+    schema        => [
+<%
+        for (IMetadataColumn column: metadata.getListColumns()) {
+%>
+    	{
+            name    => '<%=column.getLabel() %>',
+            key     => <%=column.isKey() %>,
+            type    => '<%=column.getType() %>',
+            len     => <%=column.getLength() %>,
+            null    => <%=column.isNullable() %>,
+            default => '<%=column.getDefault() %>',
+            comment => '<%=column.getComment() %>',
+        },
+<%
+       }
+%>
+    ],
+    queries => [
+<%
+        for (int i = 0; i < mapping.size(); i++) {
+            Map<String, String> line = mapping.get(i);
+%>
+        <%= line.get("QUERY") %>,
+<%
+        }
+%>
+    ],
+);
+
+use XML::LibXML;
+
+my $parser_<%=cid%> = XML::LibXML->new();
+my $tree_<%=cid%> = $parser_<%=cid%>->parse_file(<%=filename%>);
+my $root_<%=cid%> = $tree_<%=cid%>->getDocumentElement;
+my $nb_line_<%=cid%> = 0;
+
+foreach my $line_<%=cid%> ($root_<%=cid%>->findnodes(<%=loopQuery%>)) {
+    $nb_line_<%=cid%>++;
+
+<%
+        if (!limit.equals("undef")) {
+%>
+    last if $nb_line_<%=cid%> > $desc_<%=cid%>{limit};
+<%
+        }
+%>
+
+    my $<%=cid %> = [
+<%
+        for (int i = 0; i < mapping.size(); i++) {
+            Map<String, String> line = mapping.get(i);
+%>
+        $line_<%=cid%>->findvalue(<%= line.get("QUERY") %>),
+<%
+        }
+%>
+    ];
+
+<%
+    }
+}
+%>
