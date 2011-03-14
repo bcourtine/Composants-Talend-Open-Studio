@@ -45,6 +45,9 @@ sb_<%=cid%>.append(") VALUES (");
 sb_<%=cid%>.append(", ");
 <%
 			}
+			// Le test de nullité n'est effectué que pour les types nullables, afin d'éviter une
+			// erreur de compilation pour les types primitifs.
+			if (column.isNullable()) {
 %>
 if (<%=conn.getName()%>.<%=column.getLabel()%> == null) {
 	sb_<%=cid%>.append("NULL");
@@ -52,6 +55,11 @@ if (<%=conn.getName()%>.<%=column.getLabel()%> == null) {
 	sb_<%=cid%>.append("'").append(<%=conn.getName()%>.<%=column.getLabel()%>).append("'");
 }
 <%
+			} else {
+%>
+	sb_<%=cid%>.append("'").append(<%=conn.getName()%>.<%=column.getLabel()%>).append("'");
+<%
+			}
 		}
 %>
 sb_<%=cid%>.append(");");
