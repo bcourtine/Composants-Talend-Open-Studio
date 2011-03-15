@@ -18,6 +18,8 @@ final String cid = node.getUniqueName();
 final String filename = ElementParameterParser.getValue(node, "__FILENAME__");
 final boolean isCreate = ("true").equals(ElementParameterParser.getValue(node, "__CREATE__" ));
 final boolean isAppendFile = ("true").equals(ElementParameterParser.getValue(node, "__APPEND_FILE__" ));
+final boolean forceEncoding = ("true").equals(ElementParameterParser.getValue(node, "__FORCE_ENCODING__" ));
+final String encoding = ElementParameterParser.getValue(node, "__ENCODING__" );
 
 // Génération de code uniquement en cas de connexion entrante
 List<IMetadataTable> metadatas = node.getMetadataList();
@@ -40,14 +42,31 @@ if (parentFile_<%=cid%> != null && !parentFile_<%=cid%>.exists()) {
 }
 <%
 				}
-				if (isAppendFile) {
+				if (forceEncoding) {
+					// La classe FileWriter ne permet pas de spécifier l'encodage. Il faut donc utiliser le couple
+					// FileOutputStream + OutputStreamWriter.
+					if (isAppendFile) {
 %>
-java.io.FileWriter fileWriter_<%=cid%> = new java.io.FileWriter(file_<%=cid%>, true);
+java.io.OutputStream fos_<%=cid%> = new java.io.FileOutputStream(file_<%=cid%>, true);
+<%
+					} else {
+%>
+java.io.OutputStream fos_<%=cid%> = new java.io.FileOutputStream(file_<%=cid%>, false);
+<%
+					}
+%>
+java.io.Writer fileWriter_<%=cid%> = new java.io.OutputStreamWriter(fos_<%=cid%>, java.nio.charset.Charset.forName(<%=encoding%>));
 <%
 				} else {
+					if (isAppendFile) {
 %>
-java.io.FileWriter fileWriter_<%=cid%> = new java.io.FileWriter(file_<%=cid%>, false);
+java.io.Writer fileWriter_<%=cid%> = new java.io.FileWriter(file_<%=cid%>, true);
 <%
+					} else {
+%>
+java.io.Writer fileWriter_<%=cid%> = new java.io.FileWriter(file_<%=cid%>, false);
+<%
+					}
 				}
 			}
 		}

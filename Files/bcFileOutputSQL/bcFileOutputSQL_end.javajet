@@ -1,6 +1,7 @@
 <%@ jet
 	imports="
 		org.talend.core.model.process.INode
+		org.talend.core.model.process.ElementParameterParser
 		org.talend.core.model.metadata.IMetadataTable
 		org.talend.core.model.process.IConnection
 		org.talend.core.model.process.IConnectionCategory
@@ -12,6 +13,7 @@
 CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
 INode node = (INode) codeGenArgument.getArgument();
 String cid = node.getUniqueName();
+final boolean forceEncoding = ("true").equals(ElementParameterParser.getValue(node, "__FORCE_ENCODING__" ));
 // Génération de code uniquement en cas de connexion entrante
 List<IMetadataTable> metadatas = node.getMetadataList();
 if ((metadatas != null) && (metadatas.size() > 0)) {
@@ -22,6 +24,9 @@ if ((metadatas != null) && (metadatas.size() > 0)) {
 			if (conn.getLineStyle().hasConnectionCategory(IConnectionCategory.DATA)) {
 %>
 fileWriter_<%=cid%>.close();
+<% if (forceEncoding) { %>
+fos_<%=cid%>.close();
+<% } %>
 globalMap.put("<%=cid%>_NB_LINE", nb_line_<%=cid%>);
 <%
 			}
