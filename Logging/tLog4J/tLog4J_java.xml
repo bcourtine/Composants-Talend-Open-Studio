@@ -135,9 +135,17 @@
 		</PARAMETER>
 
 		<PARAMETER
-				NAME="LOG_END"
+				NAME="LOG_MAIN"
 				FIELD="CHECK"
 				NUM_ROW="5"
+		>
+			<DEFAULT>true</DEFAULT>
+		</PARAMETER>
+
+		<PARAMETER
+				NAME="LOG_END"
+				FIELD="CHECK"
+				NUM_ROW="6"
 		>
 			<DEFAULT>false</DEFAULT>
 		</PARAMETER>
@@ -145,7 +153,7 @@
 		<PARAMETER
 				NAME="END_LOG_LEVEL"
 				FIELD="CLOSED_LIST"
-				NUM_ROW="5"
+				NUM_ROW="6"
 				SHOW_IF="LOG_END == 'true'"
 		>
 			<ITEMS DEFAULT="INFO">
@@ -162,7 +170,7 @@
 				NAME="END_LOG_MESSAGE"
 				FIELD="TEXT"
 				REQUIRED="true"
-				NUM_ROW="6"
+				NUM_ROW="7"
 				SHOW_IF="LOG_END == 'true'"
 		>
 			<DEFAULT>"End logging"</DEFAULT>
