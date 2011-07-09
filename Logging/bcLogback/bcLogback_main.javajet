@@ -1,9 +1,9 @@
-<%@ jet 
+<%@ jet
 	imports="
-		org.talend.core.model.process.INode 
-		org.talend.core.model.process.ElementParameterParser 
+		org.talend.core.model.process.INode
+		org.talend.core.model.process.ElementParameterParser
 		org.talend.designer.codegen.config.CodeGeneratorArgument
-	" 
+	"
 %>
 <%
 CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
@@ -15,15 +15,21 @@ String[] logMethods = {"trace","debug","info","warn","error"};
 // Version 1.2
 boolean conditionalLog = ("true").equals(ElementParameterParser.getValue(node,"__CONDITIONAL_LOG__"));
 String logCondition = ElementParameterParser.getValue(node,"__LOG_CONDITION__");
+// Version 1.3
+boolean mainLog = ("true").equals(ElementParameterParser.getValue(node,"__LOG_MAIN__"));
 %>
-
-<% if (conditionalLog) { %>
+<%
+if (mainLog) {
+	if (conditionalLog) {
+%>
 if (<%=logCondition%>) {
-<% } %>
+	<% } %>
 logger_<%=cid%>.<%=logMethods[levelValue]%>(<%=logbackMessage%>);
 nb_logged_line_<%=cid%>++;
-<% if (conditionalLog) { %>
+	<% if (conditionalLog) { %>
 }
-<% } %>
-
+<%
+	}
+}
+%>
 nb_line_<%=cid%>++;
