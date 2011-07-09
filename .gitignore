@@ -5,3 +5,5 @@
 *.iml
 # Archives Zip des composants
 *.zip
+# Répertoire de travail de Talend bin
+bin
