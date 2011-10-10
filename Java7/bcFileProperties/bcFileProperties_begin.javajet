@@ -1,4 +1,4 @@
-<%@ jet 
+<%@ jet
 imports="
     org.talend.core.model.process.INode
     org.talend.core.model.process.ElementParameterParser
@@ -10,7 +10,7 @@ imports="
     java.util.List
     org.talend.core.model.metadata.types.JavaTypesManager
     org.talend.core.model.metadata.types.JavaType
-" 
+"
 %>
 
 <%
@@ -48,13 +48,15 @@ if(file_<%=cid %>.exists()) {
     <%=outputConnName %>.dirname = file_<%=cid %>.getParent();
     <%=outputConnName %>.basename = file_<%=cid %>.getName();
     String r_<%=cid%> = (file_<%=cid%>.canRead())?"r":"-";
-	String w_<%=cid%> = (file_<%=cid%>.canWrite())?"w":"-";
-	//String x_ = (file_.canExecute())?"x":"-"; /*since JDK1.6*/
-    <%=outputConnName %>.mode_string = r_<%=cid%> + w_<%=cid%>;
+    String w_<%=cid%> = (file_<%=cid%>.canWrite())?"w":"-";
+    String x_<%=cid%> = (file_<%=cid%>.canExecute())?"x":"-";
+    <%=outputConnName %>.mode_string = r_<%=cid%> + w_<%=cid%> + x_<%=cid%>;
     <%=outputConnName %>.size = file_<%=cid %>.length();
     <%=outputConnName %>.mtime = file_<%=cid %>.lastModified();
     <%=outputConnName %>.mtime_string =(new java.util.Date(file_<%=cid%>.lastModified())).toString();
-	
+    <%=outputConnName %>.owner = java.nio.file.Files.getOwner(file_<%=cid%>.toPath()).toString();
+    <%=outputConnName %>.permissions = java.nio.file.attribute.PosixFilePermissions.toString(java.nio.file.Files.getPosixFilePermissions(file_<%=cid%>.toPath()));
+
 	<%if(MD5){%>
 		// Calculation of the Message Digest MD5
 		java.io.InputStream is_<%=cid %> = new java.io.FileInputStream(file_<%=cid %>);
