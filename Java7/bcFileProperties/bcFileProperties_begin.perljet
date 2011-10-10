@@ -1,0 +1,100 @@
+<%@ jet 
+imports="
+    org.talend.core.model.process.INode 
+    org.talend.core.model.process.ElementParameterParser 
+    org.talend.core.model.metadata.IMetadataTable 
+    org.talend.core.model.metadata.IMetadataColumn 
+    org.talend.designer.codegen.config.CodeGeneratorArgument
+    java.util.List
+" 
+%>
+
+<%
+CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
+INode node = (INode)codeGenArgument.getArgument();
+String cid = node.getUniqueName();
+
+List<IMetadataTable> metadatas = node.getMetadataList();
+if ((metadatas!=null)&&(metadatas.size()>0)) {
+    IMetadataTable metadata = metadatas.get(0);
+    if (metadata!=null) {
+
+        String filename = ElementParameterParser.getValue(
+            node,
+            "__FILENAME__"
+        );
+
+        boolean fillModeString = ElementParameterParser.getValue(
+            node,
+            "__FILL_MODE_STRING__"
+        ).equals("true");
+
+        if (fillModeString) {
+%>
+use File::Stat::ModeString;
+<%
+        }
+%>
+use Cwd qw/abs_path/;
+use File::Basename;
+
+my %desc_<%=cid %> = (
+    filename => <%=filename%>,
+    schema => [
+<%
+        for (IMetadataColumn column: metadata.getListColumns()) {
+%>
+    	{
+            name    => '<%=column.getLabel() %>',
+        },
+<%
+        }
+%>
+    ]
+);
+
+<%
+        int column_number = 0;
+        for (IMetadataColumn column: metadata.getListColumns()) {
+%>
+use constant <%=cid%>__<%=column.getLabel()%> => <%=column_number%>;
+<%
+            column_number++;
+        }
+%>
+
+my @stat_<%=cid%> = stat($desc_<%=cid%>{filename});
+
+my @<%=cid%> = (
+    abs_path($desc_<%=cid%>{filename}),
+    dirname($desc_<%=cid%>{filename}),
+    basename($desc_<%=cid%>{filename}),
+    $stat_<%=cid%>[2], # mode
+<%
+        if (fillModeString) {
+%>
+    mode_to_string($stat_<%=cid%>[2]), # mode_string
+<%
+        }
+        else {
+%>
+    undef, # mode_string
+<%
+        }
+%>
+    $stat_<%=cid%>[4], # uid
+    $stat_<%=cid%>[5], # gid
+    $stat_<%=cid%>[7], # size
+    $stat_<%=cid%>[8], # atime
+    getDate('CCYY-MM-DD hh:mm:ss', $stat_<%=cid%>[8]), # atime
+    $stat_<%=cid%>[9], # mtime
+    getDate('CCYY-MM-DD hh:mm:ss', $stat_<%=cid%>[9]), # mtime
+    $stat_<%=cid%>[10], # ctime
+    getDate('CCYY-MM-DD hh:mm:ss', $stat_<%=cid%>[10]), # ctime
+);
+
+my $<%=cid%> = \@<%=cid%>;
+<%
+    }
+}
+%>
