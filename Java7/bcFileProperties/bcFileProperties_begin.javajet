@@ -46,10 +46,9 @@ if(file_<%=cid %>.exists()) {
     <%=outputConnName %>.abs_path = file_<%=cid %>.getAbsolutePath();
     <%=outputConnName %>.dirname = file_<%=cid %>.getParent();
     <%=outputConnName %>.basename = file_<%=cid %>.getName();
-    String r_<%=cid%> = (file_<%=cid%>.canRead())?"r":"-";
-    String w_<%=cid%> = (file_<%=cid%>.canWrite())?"w":"-";
-    String x_<%=cid%> = (file_<%=cid%>.canExecute())?"x":"-";
-    <%=outputConnName %>.mode_string = r_<%=cid%> + w_<%=cid%> + x_<%=cid%>;
+    <%=outputConnName %>.is_readable = file_<%=cid%>.canRead();
+    <%=outputConnName %>.is_writable = file_<%=cid%>.canWrite();
+    <%=outputConnName %>.is_executable = file_<%=cid%>.canExecute();
     <%=outputConnName %>.size = file_<%=cid %>.length();
     <%=outputConnName %>.mtime = file_<%=cid %>.lastModified();
     <%=outputConnName %>.owner = java.nio.file.Files.getOwner(file_<%=cid%>.toPath()).toString();

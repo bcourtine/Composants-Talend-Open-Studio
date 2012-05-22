@@ -42,7 +42,9 @@
         <COLUMN NAME="abs_path" TYPE="id_String" LENGTH="255"/>
         <COLUMN NAME="dirname" TYPE="id_String" LENGTH="255"/>
         <COLUMN NAME="basename" TYPE="id_String" LENGTH="255"/>
-        <COLUMN NAME="mode_string" TYPE="id_String" LENGTH="10"/>
+        <COLUMN NAME="is_readable" TYPE="id_Boolean" />
+        <COLUMN NAME="is_writable" TYPE="id_Boolean" />
+        <COLUMN NAME="is_executable" TYPE="id_Boolean" />
         <COLUMN NAME="size" TYPE="id_Long" LENGTH="20"/>
         <COLUMN NAME="mtime" TYPE="id_Long" LENGTH="20"/>
         <COLUMN NAME="md5" TYPE="id_String" LENGTH="32"/>
@@ -53,7 +55,9 @@
         <COLUMN NAME="abs_path" TYPE="id_String" LENGTH="255"/>
         <COLUMN NAME="dirname" TYPE="id_String" LENGTH="255"/>
         <COLUMN NAME="basename" TYPE="id_String" LENGTH="255"/>
-        <COLUMN NAME="mode_string" TYPE="id_String" LENGTH="10"/>
+        <COLUMN NAME="is_readable" TYPE="id_Boolean" />
+        <COLUMN NAME="is_writable" TYPE="id_Boolean" />
+        <COLUMN NAME="is_executable" TYPE="id_Boolean" />
         <COLUMN NAME="size" TYPE="id_Long" LENGTH="20"/>
         <COLUMN NAME="mtime" TYPE="id_Long" LENGTH="20"/>
         <COLUMN NAME="owner" TYPE="id_String" LENGTH="32"/>
