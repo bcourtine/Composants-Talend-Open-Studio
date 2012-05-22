@@ -20,8 +20,7 @@ String cid = node.getUniqueName();
 
 String filename = ElementParameterParser.getValue(node, "__FILENAME__");
 
-boolean MD5 = new Boolean(ElementParameterParser.getValue(node, "__MD5__"));
-
+boolean MD5 = Boolean.valueOf(ElementParameterParser.getValue(node, "__MD5__"));
 
 String outputConnName = null;
 List< ? extends IConnection> conns = node.getOutgoingSortedConnections();
@@ -53,9 +52,12 @@ if(file_<%=cid %>.exists()) {
     <%=outputConnName %>.mode_string = r_<%=cid%> + w_<%=cid%> + x_<%=cid%>;
     <%=outputConnName %>.size = file_<%=cid %>.length();
     <%=outputConnName %>.mtime = file_<%=cid %>.lastModified();
-    <%=outputConnName %>.mtime_string =(new java.util.Date(file_<%=cid%>.lastModified())).toString();
     <%=outputConnName %>.owner = java.nio.file.Files.getOwner(file_<%=cid%>.toPath()).toString();
-    <%=outputConnName %>.permissions = java.nio.file.attribute.PosixFilePermissions.toString(java.nio.file.Files.getPosixFilePermissions(file_<%=cid%>.toPath()));
+    if(!"Windows".equalsIgnoreCase(System.getProperty("os.name"))) {
+      <%=outputConnName %>.permissions = java.nio.file.attribute.PosixFilePermissions.toString(java.nio.file.Files.getPosixFilePermissions(file_<%=cid%>.toPath()));
+    } else {
+      <%=outputConnName %>.permissions = "";
+    }
 
 	<%if(MD5){%>
 		// Calculation of the Message Digest MD5

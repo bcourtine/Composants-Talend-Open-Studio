@@ -2,11 +2,11 @@
   <HEADER
       PLATEFORM="ALL"
       SERIAL=""
-      VERSION="0.1"
+      VERSION="0.2"
       STATUS="ALPHA"
       COMPATIBILITY="ALL"
       AUTHOR="Benoit Courtine"
-      RELEASE_DATE="20111010A"
+      RELEASE_DATE="20120522A"
       STARTABLE="true"
   >
     <SIGNATURE/>
@@ -45,7 +45,6 @@
         <COLUMN NAME="mode_string" TYPE="id_String" LENGTH="10"/>
         <COLUMN NAME="size" TYPE="id_Long" LENGTH="20"/>
         <COLUMN NAME="mtime" TYPE="id_Long" LENGTH="20"/>
-        <COLUMN NAME="mtime_string" TYPE="id_String" LENGTH="20"/>
         <COLUMN NAME="md5" TYPE="id_String" LENGTH="32"/>
         <COLUMN NAME="owner" TYPE="id_String" LENGTH="32"/>
         <COLUMN NAME="permissions" TYPE="id_String" LENGTH="32"/>
@@ -57,7 +56,6 @@
         <COLUMN NAME="mode_string" TYPE="id_String" LENGTH="10"/>
         <COLUMN NAME="size" TYPE="id_Long" LENGTH="20"/>
         <COLUMN NAME="mtime" TYPE="id_Long" LENGTH="20"/>
-        <COLUMN NAME="mtime_string" TYPE="id_String" LENGTH="20"/>
         <COLUMN NAME="owner" TYPE="id_String" LENGTH="32"/>
         <COLUMN NAME="permissions" TYPE="id_String" LENGTH="32"/>
       </TABLE>
