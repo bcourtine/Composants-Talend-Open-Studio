@@ -46,7 +46,9 @@
         <COLUMN NAME="is_writable" TYPE="id_Boolean" />
         <COLUMN NAME="is_executable" TYPE="id_Boolean" />
         <COLUMN NAME="size" TYPE="id_Long" LENGTH="20"/>
+        <COLUMN NAME="ctime" TYPE="id_Long" LENGTH="20"/>
         <COLUMN NAME="mtime" TYPE="id_Long" LENGTH="20"/>
+        <COLUMN NAME="atime" TYPE="id_Long" LENGTH="20"/>
         <COLUMN NAME="hash" TYPE="id_String" LENGTH="32"/>
         <COLUMN NAME="owner" TYPE="id_String" LENGTH="32"/>
         <COLUMN NAME="is_hidden" TYPE="id_Boolean" />
@@ -61,7 +63,9 @@
         <COLUMN NAME="is_writable" TYPE="id_Boolean" />
         <COLUMN NAME="is_executable" TYPE="id_Boolean" />
         <COLUMN NAME="size" TYPE="id_Long" LENGTH="20"/>
+        <COLUMN NAME="ctime" TYPE="id_Long" LENGTH="20"/>
         <COLUMN NAME="mtime" TYPE="id_Long" LENGTH="20"/>
+        <COLUMN NAME="atime" TYPE="id_Long" LENGTH="20"/>
         <COLUMN NAME="owner" TYPE="id_String" LENGTH="32"/>
         <COLUMN NAME="is_hidden" TYPE="id_Boolean" />
         <COLUMN NAME="is_symbolic" TYPE="id_Boolean" />

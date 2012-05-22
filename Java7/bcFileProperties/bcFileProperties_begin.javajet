@@ -41,6 +41,7 @@ if (outputConnName != null){
 %>
 
 java.io.File file_<%=cid %> = new java.io.File(<%=filename %>);
+java.nio.file.Path path_<%=cid %> = file_<%=cid %>.toPath();
 <%=outputConnName %> = new <%=outputConnName %>Struct();
 
 if(file_<%=cid %>.exists()) {
@@ -51,12 +52,15 @@ if(file_<%=cid %>.exists()) {
     <%=outputConnName %>.is_writable = file_<%=cid%>.canWrite();
     <%=outputConnName %>.is_executable = file_<%=cid%>.canExecute();
     <%=outputConnName %>.size = file_<%=cid %>.length();
-    <%=outputConnName %>.mtime = file_<%=cid %>.lastModified();
-    <%=outputConnName %>.owner = java.nio.file.Files.getOwner(file_<%=cid%>.toPath()).toString();
-    <%=outputConnName %>.is_hidden = java.nio.file.Files.isHidden(file_<%=cid%>.toPath());
-    <%=outputConnName %>.is_symbolic = java.nio.file.Files.isSymbolicLink(file_<%=cid%>.toPath());
+    java.nio.file.attribute.BasicFileAttributes basicAttributes_<%=cid%> = java.nio.file.Files.getFileAttributeView(path_<%=cid%>, java.nio.file.attribute.BasicFileAttributeView.class).readAttributes();
+    <%=outputConnName %>.ctime = basicAttributes_<%=cid%>.creationTime().toMillis();
+    <%=outputConnName %>.mtime = basicAttributes_<%=cid%>.lastModifiedTime().toMillis();
+    <%=outputConnName %>.atime = basicAttributes_<%=cid%>.lastAccessTime().toMillis();
+    <%=outputConnName %>.owner = java.nio.file.Files.getOwner(path_<%=cid%>).toString();
+    <%=outputConnName %>.is_hidden = java.nio.file.Files.isHidden(path_<%=cid%>);
+    <%=outputConnName %>.is_symbolic = java.nio.file.Files.isSymbolicLink(path_<%=cid%>);
     if(!"Windows".equalsIgnoreCase(System.getProperty("os.name"))) {
-      <%=outputConnName %>.permissions = java.nio.file.attribute.PosixFilePermissions.toString(java.nio.file.Files.getPosixFilePermissions(file_<%=cid%>.toPath()));
+      <%=outputConnName %>.permissions = java.nio.file.attribute.PosixFilePermissions.toString(java.nio.file.Files.getPosixFilePermissions(path_<%=cid%>));
     } else {
       <%=outputConnName %>.permissions = "";
     }
