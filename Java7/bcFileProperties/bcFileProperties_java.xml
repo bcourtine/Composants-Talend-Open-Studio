@@ -38,7 +38,7 @@
         NUM_ROW="10"
     >
 
-      <TABLE READONLY="true" IF="MD5=='true'">
+      <TABLE READONLY="true" IF="HASH=='true'">
         <COLUMN NAME="abs_path" TYPE="id_String" LENGTH="255"/>
         <COLUMN NAME="dirname" TYPE="id_String" LENGTH="255"/>
         <COLUMN NAME="basename" TYPE="id_String" LENGTH="255"/>
@@ -47,11 +47,11 @@
         <COLUMN NAME="is_executable" TYPE="id_Boolean" />
         <COLUMN NAME="size" TYPE="id_Long" LENGTH="20"/>
         <COLUMN NAME="mtime" TYPE="id_Long" LENGTH="20"/>
-        <COLUMN NAME="md5" TYPE="id_String" LENGTH="32"/>
+        <COLUMN NAME="hash" TYPE="id_String" LENGTH="32"/>
         <COLUMN NAME="owner" TYPE="id_String" LENGTH="32"/>
         <COLUMN NAME="permissions" TYPE="id_String" LENGTH="32"/>
       </TABLE>
-      <TABLE READONLY="true" IF="MD5=='false'">
+      <TABLE READONLY="true" IF="HASH=='false'">
         <COLUMN NAME="abs_path" TYPE="id_String" LENGTH="255"/>
         <COLUMN NAME="dirname" TYPE="id_String" LENGTH="255"/>
         <COLUMN NAME="basename" TYPE="id_String" LENGTH="255"/>
@@ -74,8 +74,25 @@
       <DEFAULT>"__COMP_DEFAULT_FILE_DIR__/file.txt"</DEFAULT>
     </PARAMETER>
 
-    <PARAMETER NAME="MD5" FIELD="CHECK" REQUIRED="true" NUM_ROW="50">
+    <PARAMETER NAME="HASH" FIELD="CHECK" REQUIRED="true" NUM_ROW="50">
       <DEFAULT>false</DEFAULT>
+    </PARAMETER>
+
+    <PARAMETER
+        NAME="DIGEST_METHOD"
+        FIELD="CLOSED_LIST"
+        NUM_ROW="60"
+        REQUIRED="true"
+        SHOW_IF="HASH == 'true'"
+    >
+      <ITEMS DEFAULT="MD5">
+        <ITEM NAME="MD2" VALUE="MD2" />
+        <ITEM NAME="MD5" VALUE="MD5" />
+        <ITEM NAME="SHA-1" VALUE="SHA-1" />
+        <ITEM NAME="SHA-256" VALUE="SHA-256" />
+        <ITEM NAME="SHA-384" VALUE="SHA-384" />
+        <ITEM NAME="SHA-512" VALUE="SHA-512" />
+      </ITEMS>
     </PARAMETER>
   </PARAMETERS>
 

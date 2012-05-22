@@ -20,7 +20,8 @@ String cid = node.getUniqueName();
 
 String filename = ElementParameterParser.getValue(node, "__FILENAME__");
 
-boolean MD5 = Boolean.valueOf(ElementParameterParser.getValue(node, "__MD5__"));
+boolean hash = Boolean.valueOf(ElementParameterParser.getValue(node, "__HASH__"));
+String digestMethod = ElementParameterParser.getValue(node, "__DIGEST_METHOD__");
 
 String outputConnName = null;
 List< ? extends IConnection> conns = node.getOutgoingSortedConnections();
@@ -58,16 +59,16 @@ if(file_<%=cid %>.exists()) {
       <%=outputConnName %>.permissions = "";
     }
 
-	<%if(MD5){%>
-		// Calculation of the Message Digest MD5
+	<%if(hash){%>
+		// Calculation of the Message Digest
 		java.io.InputStream is_<%=cid %> = new java.io.FileInputStream(file_<%=cid %>);
 		byte[] buffer_<%=cid %> = new byte[8192];
 		int read_<%=cid %> = 0;
-		java.security.MessageDigest dgs_<%=cid %> = java.security.MessageDigest.getInstance("MD5");
+		java.security.MessageDigest dgs_<%=cid %> = java.security.MessageDigest.getInstance("<%=digestMethod %>");
 		while( (read_<%=cid %> = is_<%=cid %>.read(buffer_<%=cid %>)) > 0) {
 			dgs_<%=cid %>.update(buffer_<%=cid %>, 0, read_<%=cid %>);
 		}
-		<%=outputConnName %>.md5 =String.format("%032x", new java.math.BigInteger(1, dgs_<%=cid %>.digest()));
+		<%=outputConnName %>.hash =String.format("%032x", new java.math.BigInteger(1, dgs_<%=cid %>.digest()));
 		is_<%=cid %>.close();
 	<%}%>
 }
