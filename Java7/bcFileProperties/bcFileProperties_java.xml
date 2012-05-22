@@ -49,6 +49,8 @@
         <COLUMN NAME="mtime" TYPE="id_Long" LENGTH="20"/>
         <COLUMN NAME="hash" TYPE="id_String" LENGTH="32"/>
         <COLUMN NAME="owner" TYPE="id_String" LENGTH="32"/>
+        <COLUMN NAME="is_hidden" TYPE="id_Boolean" />
+        <COLUMN NAME="is_symbolic" TYPE="id_Boolean" />
         <COLUMN NAME="permissions" TYPE="id_String" LENGTH="32"/>
       </TABLE>
       <TABLE READONLY="true" IF="HASH=='false'">
@@ -61,6 +63,8 @@
         <COLUMN NAME="size" TYPE="id_Long" LENGTH="20"/>
         <COLUMN NAME="mtime" TYPE="id_Long" LENGTH="20"/>
         <COLUMN NAME="owner" TYPE="id_String" LENGTH="32"/>
+        <COLUMN NAME="is_hidden" TYPE="id_Boolean" />
+        <COLUMN NAME="is_symbolic" TYPE="id_Boolean" />
         <COLUMN NAME="permissions" TYPE="id_String" LENGTH="32"/>
       </TABLE>
     </PARAMETER>

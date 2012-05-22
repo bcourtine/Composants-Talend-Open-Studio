@@ -53,6 +53,8 @@ if(file_<%=cid %>.exists()) {
     <%=outputConnName %>.size = file_<%=cid %>.length();
     <%=outputConnName %>.mtime = file_<%=cid %>.lastModified();
     <%=outputConnName %>.owner = java.nio.file.Files.getOwner(file_<%=cid%>.toPath()).toString();
+    <%=outputConnName %>.is_hidden = java.nio.file.Files.isHidden(file_<%=cid%>.toPath());
+    <%=outputConnName %>.is_symbolic = java.nio.file.Files.isSymbolicLink(file_<%=cid%>.toPath());
     if(!"Windows".equalsIgnoreCase(System.getProperty("os.name"))) {
       <%=outputConnName %>.permissions = java.nio.file.attribute.PosixFilePermissions.toString(java.nio.file.Files.getPosixFilePermissions(file_<%=cid%>.toPath()));
     } else {
