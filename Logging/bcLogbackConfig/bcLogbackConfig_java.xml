@@ -64,9 +64,9 @@
 
 	<CODEGENERATION>
 		<IMPORTS>
-			<IMPORT MODULE="logback-core-0.9.29.jar" NAME="logback-core-0.9.29" REQUIRED="true"/>
-			<IMPORT MODULE="logback-classic-0.9.29.jar" NAME="logback-classic-0.9.29" REQUIRED="true"/>
-			<IMPORT MODULE="slf4j-api-1.6.1.jar" NAME="slf4j-api-1.6.1" REQUIRED="true"/>
+			<IMPORT MODULE="logback-core-1.0.7.jar" NAME="logback-core-1.0.7" REQUIRED="true"/>
+			<IMPORT MODULE="logback-classic-1.0.7.jar" NAME="logback-classic-1.0.7" REQUIRED="true"/>
+			<IMPORT MODULE="slf4j-api-1.7.2.jar" NAME="slf4j-api-1.7.2" REQUIRED="true"/>
 		</IMPORTS>
 	</CODEGENERATION>
 
