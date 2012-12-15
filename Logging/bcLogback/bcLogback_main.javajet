@@ -3,6 +3,8 @@
 		org.talend.core.model.process.INode
 		org.talend.core.model.process.ElementParameterParser
 		org.talend.designer.codegen.config.CodeGeneratorArgument
+		java.util.List
+		java.util.Map
 	"
 %>
 <%
@@ -17,14 +19,21 @@ boolean conditionalLog = ("true").equals(ElementParameterParser.getValue(node,"_
 String logCondition = ElementParameterParser.getValue(node,"__LOG_CONDITION__");
 // Version 1.3
 boolean mainLog = ("true").equals(ElementParameterParser.getValue(node,"__LOG_MAIN__"));
+// Version 2.0
+List<Map<String, String>> logParams = (List<Map<String,String>>)ElementParameterParser.getObjectValue(node, "__LOG_PARAMS__");
 %>
 <%
 if (mainLog) {
 	if (conditionalLog) {
 %>
 if (<%=logCondition%>) {
-	<% } %>
-logger_<%=cid%>.<%=logMethods[levelValue]%>(<%=logbackMessage%>);
+	<% }
+    StringBuilder params = new StringBuilder();
+    for (Map<String,String> logParam : logParams) {
+        params.append(",").append(logParam.get("PARAM"));
+    }
+    %>
+logger_<%=cid%>.<%=logMethods[levelValue]%>(<%=logbackMessage%><%=params%>);
 nb_logged_line_<%=cid%>++;
 	<% if (conditionalLog) { %>
 }

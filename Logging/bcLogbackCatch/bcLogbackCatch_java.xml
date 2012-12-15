@@ -6,11 +6,11 @@
 			COMPATIBILITY="ALL"
 			DATA_AUTO_PROPAGATE="true"
 			PLATEFORM="ALL"
-			RELEASE_DATE="20110709A"
+			RELEASE_DATE="20121126A"
 			SERIAL=""
 			STARTABLE="false"
 			STATUS="ALPHA"
-			VERSION="1.3"
+			VERSION="2.0"
 			HAS_CONDITIONAL_OUTPUTS="false"
 	>
 		<SIGNATURE/>
@@ -83,9 +83,9 @@
 
 	<CODEGENERATION>
 		<IMPORTS>
-			<IMPORT MODULE="logback-core-0.9.29.jar" NAME="logback-core-0.9.29" REQUIRED="true"/>
-			<IMPORT MODULE="logback-classic-0.9.29.jar" NAME="logback-classic-0.9.29" REQUIRED="true"/>
-			<IMPORT MODULE="slf4j-api-1.6.1.jar" NAME="slf4j-api-1.6.1" REQUIRED="true"/>
+			<IMPORT MODULE="logback-core-1.0.7.jar" NAME="logback-core-1.0.7" REQUIRED="true"/>
+			<IMPORT MODULE="logback-classic-1.0.7.jar" NAME="logback-classic-1.0.7" REQUIRED="true"/>
+			<IMPORT MODULE="slf4j-api-1.7.2.jar" NAME="slf4j-api-1.7.2" REQUIRED="true"/>
 		</IMPORTS>
 	</CODEGENERATION>
 
